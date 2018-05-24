@@ -1,4 +1,4 @@
-##**Mobile Genetic Elements Retrieving Tool** - **MGERT**
+## **Mobile Genetic Elements Retrieving Tool** - **MGERT**
 
 *MGERT* is a computational pipeline for easy retrieving (extracting) of sequences of mobile genetic elements (MGE) of specified family and encoding particular functional domains from genome assemblies. It allows investigator to get coding sequences and adjacent (flanking) regions of MGE of particular family ready for further analysis.
 *MGERT* utilizes several well established bioinformatic tools combined into single pipeline which hides from the inexperienced user different technical quirks of underlying programs.
