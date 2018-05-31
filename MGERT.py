@@ -750,7 +750,7 @@ def get_seq(pandas=False, merge=0, ori=False, rm_tab=""):
 
 # GetORF part
 
-def rps_blast(in_file, cdd, e_value=0.01, threads=1, outprefix="matches_w_hits", xml_prefix="hitdata", stat=True, check=False):
+def rps_blast(in_file, cdd, e_value=0.01, threads=1, outprefix_="matches_w_hits", xml_prefix="hitdata", stat=True, check=False):
     """
     runs rpsblast on sequences from GetSeq; the output set to xml.
     then the script gets all CD hits and writes them to a file. Also plots a histogram of hit's lengths distribution
@@ -767,12 +767,14 @@ def rps_blast(in_file, cdd, e_value=0.01, threads=1, outprefix="matches_w_hits",
     # add MGE's name to any output
     mge_name = read_config("RepeatType") + "_"
     if not check:
-        outprefix = mge_name + outprefix
-    xml_prefix = mge_name + xml_prefix
+        outprefix = mge_name + outprefix_
+    else:
+        outprefix = outprefix_
+    xml_prefix2 = mge_name + xml_prefix
 
     print("run RPS-BLAST...")
     # print("CDD location set as %s" % cdd)
-    xml_file = xml_prefix + str(e_value)[2:] + ".xml"
+    xml_file = xml_prefix2 + str(e_value)[2:] + ".xml"
 
     # for rpsblast 2.6.0+
     # rpsblast -db RTCDD/RT -query excised_matches.fa -out test.fmt5 -evalue 0.01 -outfmt 5 -num_threads 12
@@ -872,7 +874,7 @@ def check_orfs(l, cdd, threads=1, eval=0.01):
     domain = read_config("domain")
     output_prefix = infilename[:-3] + "_with_" + domain + "_e" + str(eval)[2:]
     print("Checking found ORFs with RPS-Blast...")
-    rps_blast(infilename, cdd, e_value=eval, threads=threads, outprefix=output_prefix, xml_prefix="orf_hitdata", stat=True, check=True)
+    rps_blast(infilename, cdd, e_value=eval, threads=threads, outprefix_=output_prefix, xml_prefix="orf_hitdata", stat=True, check=True)
     add_config("ORFinder Output Checked", output_prefix + ".fa")
 
 
@@ -1235,7 +1237,7 @@ def pipe(genome_file, mge_type, lib="", rm_tab="" ,stage=1, threads=1, censor=Fa
         my_cdd = read_config("CDD")
         orf_infile = read_config("ORFinder Input")
         get_orf(sequence=seq, cd_data=my_cdd, orf_in=orf_infile, min_len=l, eval=e, start_codon=c, strnd=strnd, threads=threads, gencode=g)
-        # from here there should be an entry "ORFinder Ouput Checked" in config
+        # from here there should be an entry "ORFinder Output Checked" in config
         # so retrieve its value
         checked_orfs = [rec for rec in SeqIO.parse(read_config("ORFinder Output Checked"), "fasta")]
         print("...translating ORFs...")
