@@ -1106,7 +1106,7 @@ def translator(seq_obj, gcode=1):
     # recode
     biopython_code = gencode_table_inv[gcode]
     # translate CDS
-    translated_seq = [rec.translate(table=biopython_code, cds=True) for rec in seq_obj]
+    translated_seq = [SeqRecord(rec.seq.translate(table=biopython_code, to_stop=True), id=rec.id) for rec in seq_obj]
     return translated_seq
 
 
@@ -1243,8 +1243,8 @@ def pipe(genome_file, mge_type, lib="", rm_tab="" ,stage=1, threads=1, censor=Fa
         print("...translating ORFs...")
         translated_orfs = translator(checked_orfs, gcode=g)
         # write them; filename is made by adding "a" to the suffix of checked ORFs
-        with open(read_config("ORFinder Output Checked")+"a") as f:
-            SeqIO.write(translated_orfs, f, "fasta")
+        f = read_config("ORFinder Output Checked")+"a"
+        SeqIO.write(translated_orfs, f, "fasta")
         stage += 1
 
     if stage == 5:
@@ -1289,7 +1289,7 @@ if __name__ == '__main__':
     parser.add_argument("-re", "--right_end", type=int, metavar="[500]", help="length of ORFs' right flanking region. Default 500 bp", default=500)
     parser.add_argument("-L", "--lib", type=str, metavar="[fasta file]", help="library for RepeatMasker (fasta format)", required=False, default="")
     parser.add_argument("-r", "--rm_tab", type=str, metavar="[RepeatMasker table]", help="specify repeat masker table to use, default none. Use with `-f coords` option only", default="")
-    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.2.30')
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.2.31')
 
     args = parser.parse_args()
 
