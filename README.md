@@ -1,22 +1,12 @@
 ## **Mobile Genetic Elements Retrieving Tool** - **MGERT**
 
-*MGERT* is a computational pipeline for easy retrieving (extracting) of sequences of mobile genetic elements (MGE) of specified family and encoding particular functional domains from genome assemblies. It allows investigator to get coding sequences and adjacent (flanking) regions of MGE of particular family ready for further analysis.
-*MGERT* utilizes several well established bioinformatic tools combined into single pipeline which hides from the inexperienced user different technical quirks of underlying programs.
-
-### Short description
-
-The pipeline consists of five steps or stages:
-1. *de novo* (using *RepeatModeler*) search for all MGEs in the genome assembly. This step results in a set of consensus sequences for every MGE class/family found (in *fasta* format).
-2. collecting particular consensi and search for matches in the genome assembly (using *Biopython* and *RepeatMasker*). Also it is possible to use [Censor](http://www.girinst.org/censor/) (web-version) to run additional classification of *unknown* consensi. This step results in full annotation of this particular MGE in the genome (table format) and a collection of MGE matches in fasta formatted file (using *bedtools*).
-3. Excising of found matches from the genome assembly according to coordinates in annotation table from previous step.
-4. Search only for those sequences that contain Conserved Domain (CD), ORF and CD in this ORF (via successive runs of RPS-blast and ORFinder)
-5. adding flanking regions to each sequence with ORF that contains CD.
-
-During the steps 3 & 4 the pipeline creates several diagnostic plots and calculates descriptive statistics on the found sequences.
+*MGERT* is a computational pipeline for easy retrieving of MGE's coding sequences of a particular family from genome assemblies.
+*MGERT* utilizes several established bioinformatic tools combined into single pipeline which hides different technical quirks from the inexperienced user.
 
 ### Requirements
 
-- [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/)
+
+- [RepeatModeler 1.0.11 ](http://www.repeatmasker.org/RepeatModeler/)
 - [RepeatMasker  open-4.0.7](http://www.repeatmasker.org/RMDownload.html)
 - [bedtools v2.27.0](http://bedtools.readthedocs.io/en/latest/)
 - [RPS-blast v2.7.1+](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#RPSBFtp)
@@ -28,6 +18,20 @@ During the steps 3 & 4 the pipeline creates several diagnostic plots and calcula
     - pandas v0.21.0
     - matplotlib v2.1.0
     - Biopython v1.70
+
+### Short description
+
+The pipeline includes five steps:
+1. *de novo* search for all MGEs in the genome assembly with *RepeatModeler*. 
+This step results in a set of consensus sequences for every MGE class/family found (in *fasta* format).
+Note, that the classification of the consensuses is made by the REPET package, and you can retrieve only those MGEs that were classified.
+2. collecting particular consensuses and search for their matches in the genome assembly (using *RepeatMasker*).
+3. excising of found matches from the genome assembly according to coordinates in annotation table from previous step.
+4. search only for those sequences that contain Conserved Domain (CD), ORF and CD in this ORF (via successive runs of RPS-blast and ORFinder)
+5. adding flanking regions to each sequence with ORF that contains CD.
+
+You may run the pipeline from any of these steps, for instance if you have your own MGEs library to search in a genome.
+During the steps 3 & 4 the pipeline creates several diagnostic plots and calculates descriptive statistics on the found sequences.
 
 ### Usage examples
 

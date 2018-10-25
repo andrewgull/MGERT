@@ -11,6 +11,7 @@ import glob
 import sys
 import json
 import csv
+import shutil
 from pathlib import Path
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
@@ -142,15 +143,26 @@ def make_local_cdd(dir_for_cd="LocalCDD"):
                 print("Local Conserved Domain Database is made and full path to it is added to the config.")
                 sys.exit(0)
             else:
-                print("ERROR! Place *smp files in current working directory.")
+                print("ERROR! Put *smp files in current working directory.")
                 sys.exit(1)
         if not os.path.isdir(dir_for_cd):
-            print("ERROR! Place *smp files in current working directory.")
+            print("ERROR! Put *smp files in current working directory.")
             sys.exit(1)
 
     # check if dir for CDD exists and make it, if not exists, and move into
     if not os.path.isdir(dir_for_cd):
         os.mkdir(dir_for_cd)
+
+    # check if smp table exists and move it
+    cd_table = glob.glob("*.csv")
+    if len(cd_table) == 0:
+        print("no smp table found...")
+        #print("assume there is only one CD type...")
+    else:
+        print("smp table found and added to the config...")
+        new_path = workdir + "/" + dir_for_cd +"/" + cd_table[0]
+        shutil.move(cd_table[0], new_path)
+        add_config("cd_table", new_path)
 
     # move smp files to new dir
     os.system("mv *.smp %s" % dir_for_cd)
@@ -678,21 +690,25 @@ def bed_tools(rm_file, ref_genome, ori=False, expansion=0, output_prefix="excise
         ori2bed = "sed 's/^\s*//' %s | sed -E 's/\s+/\t/g' | cut -f5-9 | " \
                   "awk 'BEGIN { OFS=\"\t\" } { print $1, $2-1, $3, $4, $5}' | " \
                   "sed -E 's/\tC/\t-/g' | sed -E 's/\t\(/\tElement\t\(/g' | " \
-                  "sort -k1,1 -k2,2n > temp.bed; mergeBed -s -d %s -i temp.bed > " % (rm_file, str(expansion)) + "%s; rm temp.bed" % (rm_file + ".bed")
+                  "sort -k1,1 -k2,2n > temp.bed; mergeBed -s -d %s -i temp.bed > temp2.bed; mergeBed -i temp2.bed > " % (rm_file, str(expansion)) + "%s; rm temp.bed; rm temp2.bed" % (rm_file + ".bed")
         os.system(ori2bed)
         # sbp.call(["sh", "ori_to_bed.sh", rm_file, str(expansion)])
         sbp.call(["bedtools", "getfasta", "-s", "-fi", ref_genome, "-bed", rm_file + ".bed", "-fo", output_prefix + str(expansion) + ".fa"])
     else:
-        print("Warning! Using RepeatMasker output with headers!")
-        out2bed = "tail -n +4 %s | sed 's/^\s*//' | sed -E 's/\s+/\t/g' | cut -f5-9 | " \
-                  "awk 'BEGIN { OFS=\"\t\" } { print $1, $2-1, $3, $4, $5}' | sed -E 's/\tC/\t-/g' | " \
-                  "sed -E 's/\t\(/\tElement\t\(/g' | sort -k1,1 -k2,2n > " \
-                  "temp.bed; mergeBed -s -d %s -i temp.bed > " % (rm_file, str(expansion)) + "%s; rm temp.bed" % (rm_file + ".bed")
+        if rm_file[-3:] == "bed":
+            print("bed-file detected")
+            sbp.call(["bedtools", "getfasta", "-s", "-fi", ref_genome, "-bed", rm_file + ".bed", "-fo", output_prefix + str(expansion) + ".fa"])
+        else:
+            print("Using RepeatMasker output with headers")
+            out2bed = "tail -n +4 %s | sed 's/^\s*//' | sed -E 's/\s+/\t/g' | cut -f5-9 | " \
+                      "awk 'BEGIN { OFS=\"\t\" } { print $1, $2-1, $3, $4, $5}' | sed -E 's/\tC/\t-/g' | " \
+                      "sed -E 's/\t\(/\tElement\t\(/g' | sort -k1,1 -k2,2n > " \
+                      "temp.bed; mergeBed -s -d %s -i temp.bed > temp2.bed; mergeBed -i temp2.bed > " % (rm_file, str(expansion)) + "%s; rm temp.bed; rm temp2.bed" % (rm_file + ".bed")
 
-        os.system(out2bed)
+            os.system(out2bed)
 
-        # sbp.call(["sh", "out_to_bed.sh", rm_file, str(expansion)])
-        sbp.call(["bedtools", "getfasta", "-s", "-fi", ref_genome, "-bed", rm_file + ".bed", "-fo", output_prefix + str(expansion) + ".fa"])
+            # sbp.call(["sh", "out_to_bed.sh", rm_file, str(expansion)])
+            sbp.call(["bedtools", "getfasta", "-s", "-fi", ref_genome, "-bed", rm_file + ".bed", "-fo", output_prefix + str(expansion) + ".fa"])
     # add output to the config
     add_config("GetSeq Output", output_prefix + str(expansion) + ".fa")
     # make plot
@@ -750,12 +766,95 @@ def get_seq(pandas=False, merge=0, ori=False, rm_tab=""):
 
 # GetORF part
 
-def rps_blast(in_file, cdd, e_value=0.01, threads=1, outprefix="matches_w_hits", xml_prefix="hitdata", stat=True, check=False):
+
+# def rps_blast(in_file, cdd, e_value=0.01, threads=1, outprefix="matches_w_hits", xml_prefix="hitdata", stat=True, check=False):
+#     """
+#     runs rpsblast on sequences from GetSeq; the output set to xml.
+#     then the script gets all CD hits and writes them to a file. Also plots a histogram of hit's lengths distribution
+#     :param in_file: input file for RPS-BLAST - fasta file from GetSeq
+#     :param cdd: path to local Conserved Domain Database (CDD), including index name
+#     :param e_value: expectation value (E), default 0.01
+#     :param threads: number of threads to use, default 1
+#     :param outprefix: prefix of the output file name
+#     :param xml_prefix: prefix of xml file (rpsblastn output)
+#     :param stat: make descriptive statistics (only when check=False)
+#     :param check: make just ORFs checking
+#     :return: no return
+#     """
+#     # add MGE's name to any output
+#     mge_name = read_config("RepeatType") + "_"
+#     if not check:
+#         outprefix = mge_name + outprefix
+#
+#     xml_prefix = mge_name + xml_prefix
+#
+#     print("run RPS-BLAST...")
+#     # print("CDD location set as %s" % cdd)
+#     xml_file = xml_prefix + str(e_value)[2:] + ".xml"
+#
+#     # for rpsblast 2.6.0+
+#     # rpsblast -db RTCDD/RT -query excised_matches.fa -out test.fmt5 -evalue 0.01 -outfmt 5 -num_threads 12
+#     # sbp.call(["rpsblast", "-i", in_file, "-p", "F", "-d", cdd,  "-e", str(e_value), "-m 7", "-l", "log", "-a", str(threads), "-o", xml_file])
+#
+#     sbp.call(["rpstblastn", "-db", cdd, "-query", in_file, "-out", xml_file, "-evalue", str(e_value), "-outfmt", "5", "-num_threads", str(threads)])
+#     if not check:
+#         # add to config only if it is not ORF checking
+#         add_config(unit="GetORF Output", val=xml_file)
+#
+#     try:
+#         hits_only = [item.query for item in NCBIXML.parse(open(xml_file)) if item.alignments]
+#         if len(hits_only) == 0:
+#             print("No sequences with hits found! Exit.")
+#             sys.exit()
+#         else:
+#             print("Found %i sequences with hits." % len(hits_only))
+#     except FileNotFoundError:
+#         print("ERROR! File %s not found!" % xml_file)
+#         sys.exit()
+#
+#     # make dictionary excised_match:SeqRecord
+#     dna_dict = dict()
+#     for record in SeqIO.parse(in_file, "fasta"):
+#         dna_dict[record.description] = record
+#
+#     # collect dna sequences with hits to a new list
+#     # note that last 3 symbols are cropped
+#     hits_only_dna = [dna_dict[item] for item in hits_only]
+#
+#     if stat:
+#         # make some stat and plots (not for check only)
+#         hits_len = pd.Series([len(item) for item in hits_only_dna])
+#         plot = hits_len.hist(color='g', alpha=0.5, bins=200)
+#         fig = plot.get_figure()
+#         fig.savefig(outprefix + "_e" + str(e_value)[2:] + ".png")
+#         plt.close(fig)
+#         des_stat = hits_len.describe()
+#         # write statistics to a file
+#         des_stat.to_csv(outprefix + "_e" + str(e_value)[2:] + ".stats", header=False, index=True, sep="\t")
+#         # print on the screen
+#         print("Statistics of excised matches' length:")
+#         print(pd.DataFrame(des_stat))
+#
+#     # make output name
+#     # if runs as part of check_orfs()
+#     if not check:
+#         matches_fname = outprefix + "_e" + str(e_value)[2:] + ".fa"
+#         # add to config matches with hits, but not checked ORFs!
+#         add_config("ORFinder Input", matches_fname)
+#     else:
+#         matches_fname = outprefix + ".fa"
+#
+#     with open(matches_fname, 'w') as handle:
+#         SeqIO.write(hits_only_dna, handle, 'fasta')
+#     # print("Done!")
+
+def rps_blast(in_file, cdd, smp_table='', e_value=0.01, threads=1, outprefix="matches_w_hits", xml_prefix="hitdata", stat=True, check=False):
     """
     runs rpsblast on sequences from GetSeq; the output set to xml.
     then the script gets all CD hits and writes them to a file. Also plots a histogram of hit's lengths distribution
     :param in_file: input file for RPS-BLAST - fasta file from GetSeq
     :param cdd: path to local Conserved Domain Database (CDD), including index name
+    :param smp_table: csv table of SMP files groupings
     :param e_value: expectation value (E), default 0.01
     :param threads: number of threads to use, default 1
     :param outprefix: prefix of the output file name
@@ -779,18 +878,58 @@ def rps_blast(in_file, cdd, e_value=0.01, threads=1, outprefix="matches_w_hits",
     # rpsblast -db RTCDD/RT -query excised_matches.fa -out test.fmt5 -evalue 0.01 -outfmt 5 -num_threads 12
     # sbp.call(["rpsblast", "-i", in_file, "-p", "F", "-d", cdd,  "-e", str(e_value), "-m 7", "-l", "log", "-a", str(threads), "-o", xml_file])
 
+    # read a table of CD groupings (assume it is tab delimited)
+    # cdgroups = "doms.txt"
+    if smp_table == '':
+        try:
+            reader = csv.reader(open(read_config('cd_table')))
+        except KeyError:
+            print("No smp table found in the config file!")
+            smptable = input("Type a path to smp table > ")
+            reader = csv.reader(open(smptable))
+    else:
+        reader = csv.reader(open(smp_table))
+    group_tab = [row for row in reader]
+    group_label = set([row[1] for row in group_tab])
+    group_dict = {}
+    for l in group_label:
+        group_dict[l]=[r[0] for r in group_tab if l in r[1]]
+
+
     sbp.call(["rpstblastn", "-db", cdd, "-query", in_file, "-out", xml_file, "-evalue", str(e_value), "-outfmt", "5", "-num_threads", str(threads)])
     if not check:
         # add to config only if it is not ORF checking
         add_config(unit="GetORF Output", val=xml_file)
 
     try:
-        hits_only = [item.query for item in NCBIXML.parse(open(xml_file)) if item.alignments]
+        #hits_only = [item.query for item in NCBIXML.parse(open(xml_file)) if item.alignments]
+        hits_only = []
+        for record in NCBIXML.parse(open(xml_file)):
+            if record.alignments:
+                hits = []
+                for align in record.alignments:
+                    hits.append(align.title)
+                # leave only the name of a CD file that produced a hit
+                # based on assumption that all 'title' start from 'gnl|CDD|123456 '
+                hits = [re.findall('^gnl\|CDD\|[0-9]* ([a-z,A-Z]*[0-9]*), ', hit)[0] for hit in hits]
+                # now I need to check for each CD label if any of its SMP present in 'hits' list
+                hits_counter = 0
+                for key in group_dict.keys():
+                    for smp in group_dict[key]:
+                        if smp[:-4] in hits:
+                            hits_counter += 1
+                            break
+                    continue
+
+                if hits_counter == len(group_dict.keys()):
+                    # all CDs were found in this record!
+                    hits_only.append(record.query)
+
         if len(hits_only) == 0:
-            print("No sequences with hits found! Exit.")
+            print("No sequences with specified number of hits found!\nTry to search for one CD.\nExit.")
             sys.exit()
         else:
-            print("Found %i sequences with hits." % len(hits_only))
+            print("Found %i sequences with %i hits." %(len(hits_only), len(group_label)))
     except FileNotFoundError:
         print("ERROR! File %s not found!" % xml_file)
         sys.exit()
@@ -829,7 +968,6 @@ def rps_blast(in_file, cdd, e_value=0.01, threads=1, outprefix="matches_w_hits",
 
     with open(matches_fname, 'w') as handle:
         SeqIO.write(hits_only_dna, handle, 'fasta')
-    # print("Done!")
 
 
 def orf_finder(input_file, s=0, g=1, l=1000, strand="plus", nested=True):
@@ -851,6 +989,9 @@ def orf_finder(input_file, s=0, g=1, l=1000, strand="plus", nested=True):
     output_prefix = mge_name + "cds" + str(l)
     add_config("ORFinder Output", output_prefix+".fa")
 
+    if input_file == '':
+        input_file = read_config("ORFinder Input")
+
     if nested:
         n = "true"
     else:
@@ -860,7 +1001,7 @@ def orf_finder(input_file, s=0, g=1, l=1000, strand="plus", nested=True):
     stderr.close()
 
 
-def check_orfs(l, cdd, threads=1, eval=0.01):
+def check_orfs(l, cdd, cd_table='', threads=1, eval=0.01):
     """
     a function to check ORFs; it runs rps_blast() function with some different parameters to check already found ORFs
     :param l: minimum length of ORF (should be the same as in orf_finder() function)
@@ -873,11 +1014,11 @@ def check_orfs(l, cdd, threads=1, eval=0.01):
     domain = read_config("domain")
     output_prefix = infilename[:-3] + "_with_" + domain + "_e" + str(eval)[2:]
     print("Checking found ORFs with RPS-Blast...")
-    rps_blast(infilename, cdd, e_value=eval, threads=threads, outprefix=output_prefix, xml_prefix="orf_hitdata", stat=True, check=True)
+    rps_blast(infilename, cdd, smp_table=cd_table, e_value=eval, threads=threads, outprefix=output_prefix, xml_prefix="orf_hitdata", stat=True, check=True)
     add_config("ORFinder Output Checked", output_prefix + ".fa")
 
 
-def get_orf(sequence, cd_data, min_len, orf_in, strnd, start_codon, eval=0.01, threads=1, gencode=1):
+def get_orf(sequence, cd_data, min_len, orf_in, strnd, start_codon, cd_tab='', eval=0.01, threads=1, gencode=1):
     """
     main function
     :param sequence: input file for RPS-BLAST - fasta file from GetSeq
@@ -891,9 +1032,9 @@ def get_orf(sequence, cd_data, min_len, orf_in, strnd, start_codon, eval=0.01, t
     :param gencode: genetic code to use (1-31, Default 0). See http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi for details.
     :return:
     """
-    rps_blast(in_file=sequence, e_value=eval, cdd=cd_data, threads=threads)
+    rps_blast(in_file=sequence, e_value=eval, cdd=cd_data, smp_table=cd_tab, threads=threads)
     orf_finder(orf_in, s=start_codon, l=min_len, strand=strnd, g=gencode)
-    check_orfs(l=min_len, cdd=cd_data, threads=threads, eval=eval)
+    check_orfs(l=min_len, cdd=cd_data, cd_table=cd_tab, threads=threads, eval=eval)
 
 # Extender part
 
@@ -1112,13 +1253,15 @@ def translator(seq_obj, gcode=1):
 # The MGERT pipeline itself
 
 
-def pipe(genome_file, mge_type, lib="", rm_tab="" ,stage=1, threads=1, censor=False, pandas=False, ori=False, merge=0, l=1000, e=0.01, c=0, strnd="plus", g=1, le=500, re=500):
+def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='', stage=1, threads=1, censor=False, pandas=False, ori=False, merge=0, l=1000, e=0.01, c=0, strnd="plus", g=1, le=500, re=500):
     """
     a function to run the whole pipeline
     :param genome_file: a genome assembly file
     :param mge_type: type of mobile element to search
+    :param dom_table: csv table with smp files and groupings
     :param lib: fasta file of consenus sequences of MGE
     :param rm_tab: a repeat masker table
+    :param seq_for_dom: file with sequences too search for domains
     :param stage: the step of the analysis to start with. 1 - rmodeler; 2 - get_cons; 3 - get_seq; 4 - get_orf
     :param threads: number of threads to use (for RepeatModeler, RepeatMasker, ORFfinder, rpstblastn)
     :param censor: use censor output data or not; default False
@@ -1135,17 +1278,23 @@ def pipe(genome_file, mge_type, lib="", rm_tab="" ,stage=1, threads=1, censor=Fa
     :return: no
     """
     # check if the genome file has right extensions
-    if ".fna.gz" not in genome_file:
-        print("Error! The genome assembly must be properly named ('genome.fna.gz`)")
+    if ".fna.gz" in genome_file:
+        # genome assembly is gzipped
+        # add genome name to the config to use it in the following steps
+        add_config("genome", genome_file)
+        # we assume, that the genome file is called `genome.fna.gz`, so we can derive the prefix by cropping last seven characters
+        add_config("prefix", genome_file[:-7])
+        dirname = read_config("prefix")
+        # make name for RepeatMasker output
+        add_config("RepeatMasker Output", genome_file[:-3] + ".out")
+    elif ".fna" in genome_file and ".gz" not in genome_file:
+        add_config("prefix", genome_file[:-4])
+        add_config("genome", genome_file + ".gz")
+        dirname = read_config("prefix")
+        add_config("RepeatMasker Output", genome_file + ".out")
+    else:
+        print("Error! Seems the genome assembly has wrong name.\nCheck if it has 'fna' or 'fna.gz' extension")
         sys.exit()
-
-    # add genome name to the config to use it in the following steps
-    add_config("genome", genome_file)
-    # we assume, that the genome file is called `genome.fna.gz`, so we can derive the prefix by cropping last seven characters
-    add_config("prefix", genome_file[:-7])
-    dirname = read_config("prefix")
-    # make name for RepeatMasker output
-    add_config("RepeatMasker Output", genome_file[:-3] + ".out")
 
     if stage == 1:
         if not os.path.isdir(dirname):
@@ -1177,7 +1326,7 @@ def pipe(genome_file, mge_type, lib="", rm_tab="" ,stage=1, threads=1, censor=Fa
         if lib == "":
             # no library specified - collect repeats consensi
             # next step -> GetCons
-            print("2/5. Collecting user-defined consensi...")
+            print("2/5. Collecting user defined consensuses...")
             get_cons(mge_type=mge_type, standard=True)
             if censor:
                 url = input("Censor output URL > ")
@@ -1232,10 +1381,30 @@ def pipe(genome_file, mge_type, lib="", rm_tab="" ,stage=1, threads=1, censor=Fa
 
         print("4/5. Collecting ORFs...")
         # os.system("GetORF.py -l %s -e %s -g %s" % (str(l), str(e), str(g)))
-        seq = read_config("GetSeq Output")
+        if seq_for_dom == '':
+            seq = read_config("GetSeq Output")
+        else:
+            seq = seq_for_dom
+
         my_cdd = read_config("CDD")
-        orf_infile = read_config("ORFinder Input")
-        get_orf(sequence=seq, cd_data=my_cdd, orf_in=orf_infile, min_len=l, eval=e, start_codon=c, strnd=strnd, threads=threads, gencode=g)
+        # ORFinder Input may be absent
+        try:
+            orf_infile = read_config("ORFinder Input")
+        except KeyError:
+            orf_infile = ''
+
+        if dom_table == '':
+            # no smp table provided
+            print("You didn't provide smp table.\nTrying to look in the config file...")
+            try:
+                dom_table = read_config("cd_table")
+                print("OK...")
+            except KeyError:
+                print("smp table not found in the config file.")
+                dom_table = input("Please provide valid path to the file > ")
+
+
+        get_orf(sequence=seq, cd_data=my_cdd, cd_tab=dom_table, orf_in=orf_infile, min_len=l, eval=e, start_codon=c, strnd=strnd, threads=threads, gencode=g)
         # from here there should be an entry "ORFinder Output Checked" in config
         # so retrieve its value
         checked_orfs = [rec for rec in SeqIO.parse(read_config("ORFinder Output Checked"), "fasta")]
@@ -1259,15 +1428,16 @@ def pipe(genome_file, mge_type, lib="", rm_tab="" ,stage=1, threads=1, censor=Fa
 
 if __name__ == '__main__':
     my_message = "Mobile Genetic Elements Retrieving Tool (MGERT).\n" \
-                 "MGERT is a pipeline for retrieving open reading frames (and flanking regions) of mobile genetic elements ready for evolutionary analysis from genomic assemblies\n" \
+                 "MGERT is a pipeline for retrieving coding sequences of mobile genetic elements from genomic assemblies\n" \
                  "To make initial configuration run configuration script with: `MGERT.py --configure`\n"
 
     parser = argparse.ArgumentParser(description=my_message,  formatter_class=argparse.RawTextHelpFormatter, prog="MGERT", usage='%(prog)s -a genome.fna.gz -T Penelope [options]')
     parser.add_argument("--configure", action="store_true", help="run the configuration script")
     parser.add_argument("--make_cdd", action="store_true", help="make local CDD")
+    parser.add_argument("-cd", "--cd_table", type=str, metavar="[domains.csv]", help="comma delimited file with smp files and their groupings.", default="")
     parser.add_argument("-a", "--assembly", type=str, metavar="[genome.fa.gz]", help="specify a genome assembly file", default="")
     parser.add_argument("-T", "--mge_type", type=str, metavar="[Penelope/BovB/RTE/CR1/L1/LINE etc]", help="specify the type of MGE to search", default="")
-    parser.add_argument("-f", "--from_stage", type=str, metavar="[cons/coords/orfs/flanks]", help="specify the step from which the pipeline should start. 'cons' - get consensi; "
+    parser.add_argument("-f", "--from_stage", type=str, metavar="[cons/coords/orfs/flanks]", help="specify the step from which the pipeline should start. 'consensus' - get consensus sequences; "
                                                                                  "'coords' - get sequences; "
                                                                                  "'orfs' - get ORFs; flanks - extend CDS.\nDefault 'rmod'", default="rmod")
     #parser.add_argument("-k", "--check_types", action="store_true", help="Print out all the types of MGE found in the RepeatModeler output")
@@ -1286,9 +1456,13 @@ if __name__ == '__main__':
                                                                                     "See http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi for details.", default=1)
     parser.add_argument("-le", "--left_end", type=int, metavar="[500]", help="length of ORFs' left flanking region. Default 500 bp", default=500)
     parser.add_argument("-re", "--right_end", type=int, metavar="[500]", help="length of ORFs' right flanking region. Default 500 bp", default=500)
-    parser.add_argument("-L", "--lib", type=str, metavar="[fasta file]", help="library for RepeatMasker (fasta format)", required=False, default="")
-    parser.add_argument("-r", "--rm_tab", type=str, metavar="[RepeatMasker table]", help="specify repeat masker table to use, default none. Use with `-f coords` option only", default="")
-    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.2.31')
+    parser.add_argument("-L", "--lib", type=str, metavar="[fasta file]", help="library for RepeatMasker (fasta format). Use with `-f cons` only.\n"
+                                                                              "When consensus library is not specified it will be automatically composed from RepeatModeler output", required=False, default="")
+    parser.add_argument("-rm", "--rm_table", type=str, metavar="[RepeatMasker table]",
+                        help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
+    parser.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
+                        help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.9')
 
     args = parser.parse_args()
 
@@ -1323,7 +1497,7 @@ if __name__ == '__main__':
     # recode the stage parameter
     if args.from_stage == "rmod":  # default
         stage = 1
-    elif args.from_stage == "cons":
+    elif args.from_stage == "cons" or args.from_stage == "consensus":
         stage = 2
     elif args.from_stage == "coords":
         stage = 3
@@ -1332,25 +1506,25 @@ if __name__ == '__main__':
     elif args.from_stage == "flanks":
         stage = 5
     else:
-        print("Wrong stage!")
+        print("Wrong stage name!")
         sys.exit()
 
     if args.censor:
         # print("Standard mode, with CENSOR")
         # get genome file
         # genome = read_config("genome", home=True)
-        pipe(genome_file=genome, mge_type=mge, stage=stage, threads=args.threads, censor=True, ori=args.ori, merge=args.merge,
-             l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, rm_tab=args.rm_tab)
+        pipe(genome_file=genome, mge_type=mge, stage=stage, seq_for_dom=args.sequence, threads=args.threads, censor=True, ori=args.ori, merge=args.merge,
+             l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, rm_tab=args.rm_table)
     elif args.lib:
         # print("Standard mode, with specified library")
         # get genome file
         # genome = read_config("genome", home=True)
-        pipe(genome_file=genome, mge_type=mge, stage=2, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
-             l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, lib=args.lib, rm_tab=args.rm_tab)
+        pipe(genome_file=genome, mge_type=mge, stage=2, seq_for_dom=args.sequence, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
+             l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, lib=args.lib, rm_tab=args.rm_table)
 
     else:
         # print("Standard mode")
         # get genome file
         # genome = read_config("genome", home=True)
-        pipe(genome_file=genome, mge_type=mge, stage=stage, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
-             l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, rm_tab=args.rm_tab)
+        pipe(genome_file=genome, mge_type=mge, stage=stage, seq_for_dom=args.sequence, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
+             l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, rm_tab=args.rm_table)
