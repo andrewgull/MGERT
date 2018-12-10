@@ -60,7 +60,7 @@ Now you can run different parts of the pipeline.
 The shortest way is to run MGERT with  *all-default* parameters:
 
 ```
-./MGERT.py -T L1
+./MGERT.py --mge-type Penelope --assembly genome.fna.gz
 ```
 This command runs search and retrieving of [L1](https://en.wikipedia.org/wiki/LINE1) retrotransposons' ORFs and flanking regions in a genome assembly (note: this file is specified in the config file!). All search parameters set to default (see "Parameters" section).
 
@@ -68,7 +68,7 @@ This command runs search and retrieving of [L1](https://en.wikipedia.org/wiki/LI
 
 There are four possible stages to run the pipeline from:
 
-- `cons` -
+- `cons` - 
 
 Consider the situation when you already have a repeat library called `L1_consensi.fasta` and therefore there is no need to run *de novo* part of the pipeline. In this case simply type the following command:
 
@@ -82,9 +82,9 @@ Consider the situation when you already have a repeat library called `L1_consens
 
 `--configure` - run the configuration script
 
-`--make_cdd` - make local Conservwd Domain database (CDD)
+`--make-cdd` - make local Conserved Domain database (CDD)
 
-`-f,  --from_stage [stage]` - choose one of the following steps from which the pipeline have to be run (default `rmod` - start from the *de novo* stage):
+`-f,  --from-stage [stage]` - choose one of the following steps from which the pipeline have to be run (default `rmod` - start from the *de novo* stage):
 
  - `cons` - collect consensi sequences;
  - `seq` - collect repeat sequences from the assembly;
@@ -99,24 +99,24 @@ Consider the situation when you already have a repeat library called `L1_consens
 
 `-m, --merge [integer]` - merge all repeats within X bp into a single entry
 
-`-e, --e_value [real]` - set expectation value (E) for RPS-Blast, default 0.01;
+`-e, --e-value [real]` - set expectation value (E) for RPS-Blast, default 0.01;
 
-`-c, --start_codon [integer]` - start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation codons; 2 = any sense codon. Default = 0;
+`-c, --start-codon [integer]` - start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation codons; 2 = any sense codon. Default = 0;
 
-`-l, --min_length [integer]` - set minimum length of ORF, default 1000 bp;
+`-l, --min-length [integer]` - set minimum length of ORF, default 1000 bp;
 
 `-s, --strand [plus/minus/both]` - output ORFs on specified strand only. Default 'plus';
 
-`-g, --genetic_code [integer]` - genetic code to use (1-31, Default 1). See [ncbi](http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi) for details;
+`-g, --genetic-code [integer]` - genetic code to use (1-31, Default 1). See [ncbi](http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi) for details;
 
-`-T, --mge_type [Penelope/BovB/RTE/CR1/L1/LINE etc]` - specify the type of MGE to search. This is a mandatory option;
+`-T, --mge-type [Penelope/BovB/RTE/CR1/L1/LINE etc]` - specify the type of MGE to search. This is a mandatory option;
 
-`-le, --left_end [integer]` - length of ORFs' left flanking region. Default 500 bp;
+`-le, --left-end [integer]` - length of ORFs' left flanking region. Default 500 bp;
 
-`-re, --right_end [integer]` - length of ORFs' right flanking region. Default 500 bp;
+`-re, --right-end [integer]` - length of ORFs' right flanking region. Default 500 bp;
 
 `-L, --lib [fasta file]` - library for RepeatMasker (in fasta format). Default none;
 
-`-r, --rm_tab [RepeatMasker table]` - specify repeat masker table to use. Default none;
+`-r, --rm-tab [RepeatMasker table]` - specify repeat masker table to use. Default none;
 
 `-v, --version` - show program's version number and exit.
