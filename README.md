@@ -55,7 +55,7 @@ This command will create a directory *LocalCDD* with all the necessary files ins
 
 Now you can run the pipeline.
 
-Below you can see an example of file-domain correspondence table
+Below you can see an example of file-domain correspondence table (no header)
 
 |               |    |
 |---------------|----|
@@ -117,6 +117,8 @@ In the case when you have coordinates of repeats' matches (either in RepeatMaske
 ./MGERT.py -T Penelope --from-stage coords --rm-table Penelope_consensi_matches.rm.out
 ```
 
+After this step a table with descriptive statistics and a histogram of repeats' lengths will be generated as well.
+
 - ORFs step
 
 Specify fasta file with sequences where to look for conserved domains and run the command:
@@ -125,35 +127,36 @@ Specify fasta file with sequences where to look for conserved domains and run th
 ./MGERT.py -T Penelope --from-stage orfs --sequence Penelope_matches_ORFs.fasta
 ```
 
+After this step a table with descriptive statistics and a histogram of repeats' lengths will be generated as well.
 
-### Parameters
+### List of arguments
 
 ```
-  -h, --help            show this help message and exit
-  --configure           run the configuration script
-  --make-cdd            make local CDD
-  -cd [domains.csv], --cd-table [domains.csv] 
-                        comma delimited file with smp files and their groupings.
+  required arguments:
   -a [genome.fa.gz], --assembly [genome.fa.gz]
                         specify a genome assembly file
   -T [Penelope/BovB/RTE/CR1/L1/LINE etc], --mge-type [Penelope/BovB/RTE/CR1/L1/LINE etc]
                         specify the type of MGE to search
+
+optional arguments:
+  -cd [domains.csv], --cd-table [domains.csv]
+                        comma delimited file with smp files and their grouping
   -f [cons/coords/orfs/flanks], --from-stage [cons/coords/orfs/flanks]
-                        specify the step from which the pipeline should start. 'consensus' - get consensus sequences; 'coords' - get sequences; 'orfs' - get ORFs; flanks - extend CDS.
+                        specify the step from which the pipeline should start. 'consensus' - get consensus sequences; 'coords' - get sequences; 'orfs' - get ORFs; flanks - add flanking sequences to CDS.
                         Default 'rmod'
   -k [consensus file], --check-types [consensus file]
                         Print out all the types of MGE found in the RepeatModeler output
   -t [integer], --threads [integer]
-                        set number of threads
+                        set number of threads. Default 1
   -C, --censor          use CENSOR for additional classification or not
   -o, --ori             if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file
-  -m M, --merge M       merge all hits within M bp into a single entry
-  -e [real], --e-value [real]
-                        set expectation value (E), default 0.01
+  -m M, --merge M       merge all hits within M bp into a single entry. Default 500 bp
+  -e [real], --e_value [real]
+                        set expectation value (E). Default 0.01
   -c [integer], --start-codon [integer]
-                        ORF start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation codons; 2 = any sense codon; Default = 0
+                        ORF start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation codons; 2 = any sense codon; Default 0
   -l [integer], --min-length [integer]
-                        set minimum length of ORF, default 1000 nt
+                        set minimum length of ORF, default 1000 bp
   -s [plus/minus/both], --strand [plus/minus/both]
                         output ORFs on specified strand only. Default 'plus'
   -g [integer], --genetic_code [integer]
@@ -170,4 +173,9 @@ Specify fasta file with sequences where to look for conserved domains and run th
   -sq [sequence.fasta], --sequence [sequence.fasta]
                         specify file name of sequences where to look for domains. Use with `-f orf` option only
   -v, --version         show program's version number and exit
+
+configuration arguments:
+  --configure           run the configuration script
+  --make-cdd            make local CDD
+
 ```

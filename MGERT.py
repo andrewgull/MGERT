@@ -1299,7 +1299,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         add_config("RepeatMasker Output", genome_file + ".out")
         genome_file = genome_file + '.gz'
     else:
-        print("Error! Seems the genome assembly has wrong name.\nCheck if it has '.fna' or '.fna.gz' extension")
+        print("Error! It seems the genome assembly has wrong name.\nCheck if it has '.fna' or '.fna.gz' extension")
         sys.exit()
 
     ### CREATE A PROPER NAME FOR ORFinder Input
@@ -1444,37 +1444,47 @@ if __name__ == '__main__':
                  "To make initial configuration run configuration script with: `MGERT.py --configure`\n"
 
     parser = argparse.ArgumentParser(description=my_message,  formatter_class=argparse.RawTextHelpFormatter, prog="MGERT", usage='%(prog)s -a genome.fna.gz -T Penelope [options]')
-    parser.add_argument("--configure", action="store_true", help="run the configuration script")
-    parser.add_argument("--make-cdd", action="store_true", help="make local CDD")
-    parser.add_argument("-cd", "--cd-table", type=str, metavar="[domains.csv]", help="comma delimited file with smp files and their groupings.", default="")
-    parser.add_argument("-a", "--assembly", type=str, metavar="[genome.fa.gz]", help="specify a genome assembly file", default="")
-    parser.add_argument("-T", "--mge-type", type=str, metavar="[Penelope/BovB/RTE/CR1/L1/LINE etc]", help="specify the type of MGE to search", default="")
-    parser.add_argument("-f", "--from-stage", type=str, metavar="[cons/coords/orfs/flanks]", help="specify the step from which the pipeline should start. 'consensus' - get consensus sequences; "
+    parser._action_groups.pop()
+    #groups
+    required = parser.add_argument_group('required arguments')
+    optional = parser.add_argument_group('optional arguments')
+    settings = parser.add_argument_group('configuration arguments')
+    #first group
+    settings.add_argument("--configure", action="store_true", help="run the configuration script")
+    settings.add_argument("--make-cdd", action="store_true", help="make local CDD")
+    #required group
+    required.add_argument("-a", "--assembly", type=str, metavar="[genome.fa.gz]", help="specify a genome assembly file", default="")
+    required.add_argument("-T", "--mge-type", type=str, metavar="[Penelope/BovB/RTE/CR1/L1/LINE etc]", help="specify the type of MGE to search", default="")
+
+    #optional group
+    excl_group = optional.add_mutually_exclusive_group()
+    optional.add_argument("-cd", "--cd-table", type=str, metavar="[domains.csv]", help="comma delimited file with smp files and their grouping", default="")
+    optional.add_argument("-f", "--from-stage", type=str, metavar="[cons/coords/orfs/flanks]", help="specify the step from which the pipeline should start. 'consensus' - get consensus sequences; "
                                                                                  "'coords' - get sequences; "
-                                                                                 "'orfs' - get ORFs; flanks - extend CDS.\nDefault 'rmod'", default="rmod")
-    #parser.add_argument("-k", "--check_types", action="store_true", help="Print out all the types of MGE found in the RepeatModeler output")
-    parser.add_argument("-k", "--check-types", type=str, metavar="[consensus file]", help="Print out all the types of MGE found in the RepeatModeler output")
-    parser.add_argument("-t", "--threads", type=int, metavar="[integer]", help="set number of threads", default=6)
-    parser.add_argument("-C", "--censor", action="store_true", help="use CENSOR for additional classification or not")
-    parser.add_argument("-o", "--ori", action="store_true", help="if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file", default=False)
-    # parser.add_argument("-d", "--pandas", action="store_false", help="run GetSeq with pandas (can be very slow)", default=False)
-    parser.add_argument("-m", "--merge", type=int, metavar="M", help="merge all hits within M bp into a single entry", default=500)
-    parser.add_argument("-e", "--e_value", type=float, metavar="[real]", help="set expectation value (E), default 0.01", default=0.01)
-    parser.add_argument("-c", "--start-codon", type=int, metavar="[integer]", help="ORF start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation "
-                                                                                                  "codons; 2 = any sense codon; Default = 0", default=0)
-    parser.add_argument("-l", "--min-length", type=int, metavar="[integer]", help="set minimum length of ORF, default 1000 nt", default=1000)
-    parser.add_argument("-s", "--strand", type=str, metavar="[plus/minus/both]", help="output ORFs on specified strand only. Default 'plus'", default="plus")
-    parser.add_argument("-g", "--genetic_code", type=int, metavar="[integer]", help="genetic code to use (1-31, Default 1). "
+                                                                                 "'orfs' - get ORFs; flanks - add flanking sequences to CDS.\nDefault 'rmod'", default="rmod")
+    #optional.add_argument("-k", "--check_types", action="store_true", help="Print out all the types of MGE found in the RepeatModeler output")
+    optional.add_argument("-k", "--check-types", type=str, metavar="[consensus file]", help="Print out all the types of MGE found in the RepeatModeler output")
+    optional.add_argument("-t", "--threads", type=int, metavar="[integer]", help="set number of threads. Default 1", default=1)
+    optional.add_argument("-C", "--censor", action="store_true", help="use CENSOR for additional classification or not")
+    optional.add_argument("-o", "--ori", action="store_true", help="if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file", default=False)
+    # optional.add_argument("-d", "--pandas", action="store_false", help="run GetSeq with pandas (can be very slow)", default=False)
+    optional.add_argument("-m", "--merge", type=int, metavar="M", help="merge all hits within M bp into a single entry. Default 500 bp", default=500)
+    optional.add_argument("-e", "--e_value", type=float, metavar="[real]", help="set expectation value (E). Default 0.01", default=0.01)
+    optional.add_argument("-c", "--start-codon", type=int, metavar="[integer]", help="ORF start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation "
+                                                                                                  "codons; 2 = any sense codon; Default 0", default=0)
+    optional.add_argument("-l", "--min-length", type=int, metavar="[integer]", help="set minimum length of ORF, default 1000 bp", default=1000)
+    optional.add_argument("-s", "--strand", type=str, metavar="[plus/minus/both]", help="output ORFs on specified strand only. Default 'plus'", default="plus")
+    optional.add_argument("-g", "--genetic_code", type=int, metavar="[integer]", help="genetic code to use (1-31, Default 1). "
                                                                                     "See http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi for details.", default=1)
-    parser.add_argument("-le", "--left-end", type=int, metavar="[500]", help="length of ORFs' left flanking region. Default 500 bp", default=500)
-    parser.add_argument("-re", "--right-end", type=int, metavar="[500]", help="length of ORFs' right flanking region. Default 500 bp", default=500)
-    parser.add_argument("-L", "--lib", type=str, metavar="[fasta file]", help="library for RepeatMasker (fasta format). Use with `-f cons` only.\n"
+    optional.add_argument("-le", "--left-end", type=int, metavar="[500]", help="length of ORFs' left flanking region. Default 500 bp", default=500)
+    optional.add_argument("-re", "--right-end", type=int, metavar="[500]", help="length of ORFs' right flanking region. Default 500 bp", default=500)
+    excl_group.add_argument("-L", "--lib", type=str, metavar="[fasta file]", help="library for RepeatMasker (fasta format). Use with `-f cons` only.\n"
                                                                               "When consensus library is not specified it will be automatically composed from RepeatModeler output", required=False, default="")
-    parser.add_argument("-rm", "--rm-table", type=str, metavar="[RepeatMasker table]",
+    excl_group.add_argument("-rm", "--rm-table", type=str, metavar="[RepeatMasker table]",
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
-    parser.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
+    excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.17')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.18')
 
     args = parser.parse_args()
 
