@@ -107,7 +107,7 @@ Furthermore, after this step a table with descriptive statistics and a histogram
 | max   | 27686.0 |
 
 
-![histogram](penelope_m2000_example_stats/Penelope_matches_w_hits_e01.png)
+![histogram](hist.png)
 
 - coordinates step
 
