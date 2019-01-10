@@ -132,7 +132,7 @@ After this step a table with descriptive statistics and a histogram of repeats' 
 ### List of arguments
 
 ```
-  required arguments:
+required arguments:
   -a [genome.fa.gz], --assembly [genome.fa.gz]
                         specify a genome assembly file
   -T [Penelope/BovB/RTE/CR1/L1/LINE etc], --mge-type [Penelope/BovB/RTE/CR1/L1/LINE etc]
