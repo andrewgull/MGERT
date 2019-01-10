@@ -53,7 +53,22 @@ This command will create a configuration file *config.json* with all the necessa
 ```
 This command will create a directory *LocalCDD* with all the necessary files inside it and the path to this CDD will be added to the *config.json*.
 
-Now you can run different parts of the pipeline.
+Now you can run the pipeline.
+
+Below you can see an example of file-domain correspondence table
+
+|               |    |
+|---------------|----|
+|  cd00304.smp  | RT |
+|  cd01648.smp  | RT |
+| pfam00078.smp | RT |
+| pfam07727.smp | RT |
+| pfam13966.smp | RT |
+|  cd01644.smp  | RT |
+|  cd01709.smp  | RT |
+|  cd10442.smp  | EN |
+|  cd00719.smp  | EN |
+
 
 #### Full pipeline run starting from *de novo* MGE search using RepeatModeler
 
@@ -70,13 +85,29 @@ There are three possible steps to run the pipeline from (except the default one)
 
 - consensus step
 
-Let's consider the situation when you already have a repeat library called `Penelope_consensi.fasta` and you want to find instances of the repeats from the library in your assembly, and therefore there is no need to run *de novo* part of the pipeline. In this case simply type in the following command:
+Let's consider the situation when you already have a repeat library called, say, `Penelope_consensi.fasta` and you want to find instances of the repeats from the library in your assembly, and therefore there is no need to run *de novo* part of the pipeline. In this case simply type in the following command:
 
-```
+```bash
 ./MGERT.py -T Penelope  --from-stage cons --lib Penelope_consensi.fasta
 ```
 
 If consensus library is not specified, it will be automatically generated from the RepeatModeler output
+
+Furthermore, after this step a table with descriptive statistics and a histogram of repeats' lengths will be generated (shown below)
+
+|       |         |
+|-------|---------|
+| count | 81848.0 |
+| mean  | 1380.6  |
+| std   | 1987.7  |
+| min   | 12.0    |
+| 25%   | 152.0   |
+| 50%   | 446.0   |
+| 75%   | 1945.0  |
+| max   | 27686.0 |
+
+
+![histogram](penelope_m2000_example_stats/Penelope_matches_w_hits_e01.png)
 
 - coordinates step
 
