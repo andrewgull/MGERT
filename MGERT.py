@@ -1484,7 +1484,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.19')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.20')
 
     args = parser.parse_args()
 
@@ -1537,12 +1537,12 @@ if __name__ == '__main__':
         # genome = read_config("genome", home=True)
         pipe(genome_file=genome, mge_type=mge, stage=stage, seq_for_dom=args.sequence, threads=args.threads, censor=True, ori=args.ori, merge=args.merge,
              l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, rm_tab=args.rm_table)
-    elif args.lib:
+    elif args.rm_library:
         # print("Standard mode, with specified library")
         # get genome file
         # genome = read_config("genome", home=True)
         pipe(genome_file=genome, mge_type=mge, stage=2, seq_for_dom=args.sequence, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
-             l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, lib=args.lib, rm_tab=args.rm_table)
+             l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, lib=args.rm_library, rm_tab=args.rm_table)
 
     else:
         # print("Standard mode")
