@@ -1469,22 +1469,22 @@ if __name__ == '__main__':
     optional.add_argument("-o", "--ori", action="store_true", help="if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file", default=False)
     # optional.add_argument("-d", "--pandas", action="store_false", help="run GetSeq with pandas (can be very slow)", default=False)
     optional.add_argument("-m", "--merge", type=int, metavar="M", help="merge all hits within M bp into a single entry. Default 500 bp", default=500)
-    optional.add_argument("-e", "--e_value", type=float, metavar="[real]", help="set expectation value (E). Default 0.01", default=0.01)
+    optional.add_argument("-e", "--e-value", type=float, metavar="[real]", help="set expectation value (E). Default 0.01", default=0.01)
     optional.add_argument("-c", "--start-codon", type=int, metavar="[integer]", help="ORF start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation "
                                                                                                   "codons; 2 = any sense codon; Default 0", default=0)
     optional.add_argument("-l", "--min-length", type=int, metavar="[integer]", help="set minimum length of ORF, default 1000 bp", default=1000)
     optional.add_argument("-s", "--strand", type=str, metavar="[plus/minus/both]", help="output ORFs on specified strand only. Default 'plus'", default="plus")
-    optional.add_argument("-g", "--genetic_code", type=int, metavar="[integer]", help="genetic code to use (1-31, Default 1). "
+    optional.add_argument("-g", "--genetic-code", type=int, metavar="[integer]", help="genetic code to use (1-31, Default 1). "
                                                                                     "See http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi for details.", default=1)
     optional.add_argument("-le", "--left-end", type=int, metavar="[500]", help="length of ORFs' left flanking region. Default 500 bp", default=500)
     optional.add_argument("-re", "--right-end", type=int, metavar="[500]", help="length of ORFs' right flanking region. Default 500 bp", default=500)
-    excl_group.add_argument("-L", "--lib", type=str, metavar="[fasta file]", help="library for RepeatMasker (fasta format). Use with `-f cons` only.\n"
+    excl_group.add_argument("-L", "--rm-library", type=str, metavar="[fasta file]", help="library for RepeatMasker (fasta format). Use with `-f cons` only.\n"
                                                                               "When consensus library is not specified it will be automatically composed from RepeatModeler output", required=False, default="")
     excl_group.add_argument("-rm", "--rm-table", type=str, metavar="[RepeatMasker table]",
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.18')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.19')
 
     args = parser.parse_args()
 
