@@ -33,6 +33,11 @@ Note, that the classification of the consensuses is made by the REPET package (a
 You may run the pipeline from any of these steps, for instance, if you have your own MGEs library to search in the genome.
 During the steps 3 & 4 the pipeline creates several diagnostic plots and calculates descriptive statistics on the found sequences (number, mean length, sd, median length, 25th and 75th length percentiles).
 
+
+### Flowchart of MGERT pipeline
+
+![flowchart](flowchart.png)
+
 ### Usage examples
 
 
