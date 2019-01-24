@@ -133,20 +133,20 @@ def make_local_cdd(dir_for_cd="LocalCDD"):
     if len(files) == 0:
         print("No smp files found in %s" % workdir)
         if os.path.isdir(dir_for_cd):
-            ans = input("LocalCDD directory found. Maybe a database already exists? [y/n] > ")
+            ans = input("LocalCDD directory is found. Maybe a database already exists? [y/n] > ")
             if ans == "y":
                 print("Ok...")
                 # add to config
                 cdd_path_full = os.getcwd() + "/" + dir_for_cd + "/" + domain_name
                 # os.chdir("../")
                 add_config("CDD", cdd_path_full)
-                print("Local Conserved Domain Database is made and full path to it is added to the config.")
+                print("Local Conserved Domain Database is made and added to the config.")
                 sys.exit(0)
             else:
-                print("ERROR! Put *smp files in current working directory.")
+                print("ERROR! Put *smp files to current working directory.")
                 sys.exit(1)
         if not os.path.isdir(dir_for_cd):
-            print("ERROR! Put *smp files in current working directory.")
+            print("ERROR! Move *smp files to the current working directory.")
             sys.exit(1)
 
     # check if dir for CDD exists and make it, if not exists, and move into
@@ -156,10 +156,10 @@ def make_local_cdd(dir_for_cd="LocalCDD"):
     # check if smp table exists and move it
     cd_table = glob.glob("*.csv")
     if len(cd_table) == 0:
-        print("no smp table found...")
+        print("no smp table is found...")
         #print("assume there is only one CD type...")
     else:
-        print("smp table found and added to the config...")
+        print("smp table is found and added to the config...")
         new_path = workdir + "/" + dir_for_cd +"/" + cd_table[0]
         shutil.move(cd_table[0], new_path)
         add_config("cd_table", new_path)
@@ -184,7 +184,7 @@ def make_local_cdd(dir_for_cd="LocalCDD"):
     # go to level up to write config in right directory
     os.chdir("../")
     add_config("CDD", cdd_path_full)
-    print("Local Conserved Domain Database is made and full path to it is added to the config.")
+    print("Local Conserved Domain Database is made and added to the config.")
 
 # GetCons part
 
@@ -310,7 +310,7 @@ def repeat_collector(filename, word, merge=False):
         SeqIO.write(extracted_sequences, output, 'fasta')
     if word == "Unknown":
         add_config("Unknown repeats file", fileout)
-    print('%s repeats from RepeatModeler output have been collected' % word)
+    print('%s Consensus TEs from RepeatModeler output have been collected' % word)
 
 
 def censor_parser(url):
@@ -344,7 +344,7 @@ def censor_parser(url):
     with open("Unknown_classified.fa", 'w') as f:
         SeqIO.write(classified, f, 'fasta')
 
-    print('Repeats from web CENSOR output have been collected.')
+    print('TEs from CENSOR output have been collected.')
 
 
 def merger(file_a, file_b, fill):
@@ -385,21 +385,21 @@ def get_cons(mge_type='', censor=False, url='', unknown=False, recollect=False, 
         # print("Now you may run CENSOR -> http://www.girinst.org/censor/")
     elif censor:
         censor_parser(url)
-        print("Censor output has been parsed and your repeats have been collected")
+        print("CENSOR output has been parsed and your TEs have been collected")
     elif unknown:
         filenm = read_config("RepeatModeler Output")
         reptype = "Unknown"
         repeat_collector(filenm, reptype)
-        print("%s repeats have been collected" % reptype)
+        print("%s TEs have been collected" % reptype)
     elif recollect:
         # reptype = read_config("RepeatType")
         fname = read_config("CENSOR Output")
         repeat_collector(fname, mge_type, merge=True)
-        print("collecting %s repeats from %s..." % (mge_type, fname))
+        print("Collecting %s TEs from %s..." % (mge_type, fname))
         file1 = mge_type + "_" + read_config("RepeatModeler Output")
         file2 = mge_type + "_" + read_config("CENSOR Output")
         merger(file1, file2, fill=mge_type)
-        print("%s repeats from newly classified sequences have been collected and merged with previous data set" % mge_type)
+        print("%s TEs from newly classified sequences have been collected and merged with previous data set" % mge_type)
     elif merge:
         # file1 = input("file #1 to merge > ")
         # file2 = input("file #2 to merge > ")
@@ -410,13 +410,13 @@ def get_cons(mge_type='', censor=False, url='', unknown=False, recollect=False, 
     elif b_types:
         file = read_config("RepeatModeler Output")
         types = check_types(file)
-        print("The following types of repeats found in %s:" % file)
+        print("The following types of TEs were found in %s:" % file)
         for type in sorted(set(types)):
             print(type, types.count(type), sep=" - ")
     elif n_types:
         file = read_config("CENSOR Output")
         types = check_types(file)
-        print("The following types of repeats found in %s:" % file)
+        print("The following types of TEs were found in %s:" % file)
         for type in sorted(set(types)):
             print(type, types.count(type), sep=" - ")
     elif a_types:
@@ -424,11 +424,11 @@ def get_cons(mge_type='', censor=False, url='', unknown=False, recollect=False, 
         file2 = read_config("CENSOR Output")
         concat = merger(file1, file2, fill="Repeats")
         types = check_types(concat)
-        print("The following types of repeats found in %s:" % concat)
+        print("The following types of TEs were found in %s:" % concat)
         for type in sorted(set(types)):
             print(type, types.count(type), sep=" - ")
     else:
-        print("Nothing to do :(")
+        print("Nothing to do :-(")
 
 # GetSeq part
 
@@ -514,7 +514,7 @@ def ori_to_csv(rm_file, len_cutoff=0, expansion=0, make_plot=True, bins=200):
 
     # drop off too short matches
     tab_sort = rm_tab[rm_tab['length'] >= len_cutoff]
-    print("matches shorter than %i bp have been dropped" % len_cutoff)
+    print("Matches shorter than %i bp have been dropped" % len_cutoff)
 
     # expanding coordinates
     tab_sort["start"] = tab_sort["start"] - expansion
@@ -564,7 +564,7 @@ def cut_match_dict(genomic_seq, rm_ori_csv, begin=1, end=2, output="excised_matc
     :param output: output file name (default "excised_matches.fa")
     :return: writes fasta file with sequences of matches [extended & counted]
     """
-    print("excision...")
+    print("Excision...")
     genome_dict = dict()
 
     # make genomic dictionary scaffold_name:SeqRecord
@@ -644,7 +644,7 @@ def translate_match(matches_file):
     :return: file with translations for RPS-Blast
     """
 
-    print("translating...")
+    print("Translating...")
     trans_list = list()
     for seq_record in SeqIO.parse(matches_file, 'fasta'):
         accession = seq_record.description
@@ -686,7 +686,7 @@ def bed_tools(rm_file, ref_genome, ori=False, expansion=0, output_prefix="excise
     output_prefix = mge_name + output_prefix
     if ori:
         rm_file = rm_file[:-4] + ".ori.out"
-        print("Using *ori.out file with bedtools")
+        print("Using *ori.out file with BEDtools")
         ori2bed = "sed 's/^\s*//' %s | sed -E 's/\s+/\t/g' | cut -f5-9 | " \
                   "awk 'BEGIN { OFS=\"\t\" } { print $1, $2-1, $3, $4, $5}' | " \
                   "sed -E 's/\tC/\t-/g' | sed -E 's/\t\(/\tElement\t\(/g' | " \
@@ -696,7 +696,7 @@ def bed_tools(rm_file, ref_genome, ori=False, expansion=0, output_prefix="excise
         sbp.call(["bedtools", "getfasta", "-s", "-fi", ref_genome, "-bed", rm_file + ".bed", "-fo", output_prefix + str(expansion) + ".fa"])
     else:
         if rm_file[-3:] == "bed":
-            print("bed-file detected")
+            #print("bed-file detected")
             sbp.call(["bedtools", "getfasta", "-s", "-fi", ref_genome, "-bed", rm_file + ".bed", "-fo", output_prefix + str(expansion) + ".fa"])
         else:
             print("Using RepeatMasker output with headers")
@@ -723,7 +723,7 @@ def bed_tools(rm_file, ref_genome, ori=False, expansion=0, output_prefix="excise
     # write statistics to a file
     des_stat.to_csv(output_prefix + str(expansion) + ".stats", header=False, index=True, sep="\t")
     # print on the screen
-    print("descriptive statistics about length of excised matches:")
+    #print("Excised matches:")
     print(pd.DataFrame(des_stat))
 
 
@@ -758,7 +758,7 @@ def get_seq(pandas=False, merge=0, ori=False, rm_tab=""):
         sys.exit()
 
     if pandas:
-        print("using pandas library")
+        print("Using pandas library")
         prfx = read_config("prefix")
         ori_to_csv(repmask_out, expansion=merge)
         cut_match_dict(genome, prfx + ".fa.cleaned.csv")
@@ -766,7 +766,7 @@ def get_seq(pandas=False, merge=0, ori=False, rm_tab=""):
         bed_tools(repmask_out, genome, expansion=merge, ori=False)
     elif ori:
         bed_tools(repmask_out, genome, expansion=merge, ori=True)
-    print("Getting sequences is done")
+    print("Collecting sequences completed...")
 
 
 # GetORF part
@@ -875,7 +875,7 @@ def rps_blast(in_file, cdd, smp_table='', e_value=0.01, threads=1, outprefix="ma
 
     xml_prefix = mge_name + xml_prefix
 
-    print("run RPS-BLAST...")
+    print("RPS-BLAST...")
     # print("CDD location set as %s" % cdd)
     xml_file = xml_prefix + str(e_value)[2:] + ".xml"
 
@@ -959,7 +959,7 @@ def rps_blast(in_file, cdd, smp_table='', e_value=0.01, threads=1, outprefix="ma
         # write statistics to a file
         des_stat.to_csv(outprefix + "_e" + str(e_value)[2:] + ".stats", header=False, index=True, sep="\t")
         # print on the screen
-        print("Statistics of excised matches' length:")
+        #print("Statistics of excised matches' length:")
         print(pd.DataFrame(des_stat))
 
     # make output name
@@ -987,7 +987,7 @@ def orf_finder(input_file, s=0, g=1, l=1000, strand="plus", nested=True):
     :param g: genetic code to use (1-31, Default 1). See http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi for details.
     :return: no return, function writes to a file instead
     """
-    print("run ORFinder...")
+    print("ORFfinder...")
 
     # get MGE name
     mge_name = read_config("RepeatType") + "_"
@@ -1317,7 +1317,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         os.chdir(dirname)
 
         # run RepeatModeler
-        print("1/5. Start RepeatModeler pipeline...\nNumber of CPUs - %s" % str(threads))
+        print("1/5. Starting RepeatModeler pipeline...\nNumber of CPUs - %s" % str(threads))
         rmodeler(genome_file, threads)
         # when rmodeler finished, it chdir back
         stage += 1  # stage = 2
@@ -1333,7 +1333,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         try:
             os.chdir(dirname)
         except FileNotFoundError:
-            print("...")
+            print("\n")
 
         if lib == "":
             # no library specified - collect repeats consensi
@@ -1341,7 +1341,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
             print("2/5. Collecting user defined consensuses...")
             get_cons(mge_type=mge_type, standard=True)
             if censor:
-                url = input("Censor output URL > ")
+                url = input("CENSOR output URL > ")
                 get_cons(censor=True, url=url)
                 get_cons(mge_type=mge_type, recollect=True)
             else:
@@ -1365,7 +1365,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         try:
             os.chdir(dirname)
         except FileNotFoundError:
-            print("...")
+            print("\n")
 
         # run GetSeq
         print("3/5. Defining coordinates in the assembly...")
@@ -1389,7 +1389,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         try:
             os.chdir(dirname)
         except FileNotFoundError:
-            print("...")
+            print("\n")
 
         print("4/5. Collecting ORFs...")
         # os.system("GetORF.py -l %s -e %s -g %s" % (str(l), str(e), str(g)))
@@ -1420,7 +1420,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         # from here there should be an entry "ORFinder Output Checked" in config
         # so retrieve its value
         checked_orfs = [rec for rec in SeqIO.parse(read_config("ORFinder Output Checked"), "fasta")]
-        print("...translating ORFs...")
+        print("Translation...")
         translated_orfs = translator(checked_orfs, gcode=g)
         # write them; filename is made by adding "a" to the suffix of checked ORFs
         f = read_config("ORFinder Output Checked")+"a"
@@ -1431,7 +1431,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         try:
             os.chdir(dirname)
         except FileNotFoundError:
-            print("...")
+            print("\n")
 
         print("5/5. Adding flanking regions...")
         cds = read_config("ORFinder Output Checked")
@@ -1484,7 +1484,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.20')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.21')
 
     args = parser.parse_args()
 
