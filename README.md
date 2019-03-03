@@ -10,7 +10,10 @@
 - [RepeatMasker  open-4.0.7](http://www.repeatmasker.org/RMDownload.html)
 - [bedtools v2.27.0](http://bedtools.readthedocs.io/en/latest/)
 - [RPS-blast v2.7.1+](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#RPSBFtp)
-- [ORFfinder v0.4.1](https://www.ncbi.nlm.nih.gov/orffinder/) - direct FTP-link ftp://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/ORFfinder/linux-i64/ORFfinder.gz
+- [ORFfinder v0.4.1](https://www.ncbi.nlm.nih.gov/orffinder/) - direct FTP-link: 
+ 
+  `ftp://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/ORFfinder/linux-i64/ORFfinder.gz`
+
 - awk (usually is preinstalled on Linux systems)
 
 - [Python](https://www.python.org/) 3.5 or higher
