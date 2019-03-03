@@ -10,8 +10,8 @@
 - [RepeatMasker  open-4.0.7](http://www.repeatmasker.org/RMDownload.html)
 - [bedtools v2.27.0](http://bedtools.readthedocs.io/en/latest/)
 - [RPS-blast v2.7.1+](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#RPSBFtp)
-- [ORFfinder v0.4.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/ORFfinder/linux-i64/ORFfinder.gz)
-- awk
+- [ORFfinder v0.4.1](https://www.ncbi.nlm.nih.gov/orffinder/) - direct FTP-link ftp://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/ORFfinder/linux-i64/ORFfinder.gz
+- awk (usually is preinstalled on Linux systems)
 
 - [Python](https://www.python.org/) 3.5 or higher
 - Python libraries:
@@ -50,13 +50,22 @@ During the steps 3 & 4 the pipeline creates several diagnostic plots and calcula
 ```
 This command will create a configuration file *config.json* with all the necessary paths (see "Requirements" section) and filenames MGERT uses. MGERT will try to find all the paths automatically. Unless it couldn't find them, it will prompt a user to enter a path or a filename.
 
-
+   - Download full Conserved Domain collection from the NCBI website: follow the [link to the Conserved Domain Database](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd.shtml), click on the **Conserved Domains** menu and choose **FTP** in the drop-down list. You will be redirected to the FTP site where you will find **cdd.tar.gz** archive. You can download it using either browser or command line utility like `wget`.
+   
+     To extract specific file from the archive use standard command: 
+   
+```
+tar -tvf cdd.tar.gz "filename.smp"
+```
+   
+    
    - Second, make your local Conserved Domain Database (CDD): put [PSSM](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#CD_PSSM) files (with *\*smp* extension) to your working directory along with a CSV file specifying file - domain correspondence, and run MGERT with the following flag:
 
 ```
 ./MGERT.py --make-cdd
 ```
 This command will create a directory *LocalCDD* with all the necessary files inside it and the path to this CDD will be added to the *config.json*.
+
 
 Now you can run the pipeline.
 
@@ -173,7 +182,7 @@ optional arguments:
   -L [fasta file], --lib [fasta file]
                         library for RepeatMasker (fasta format). Use with `-f cons` only.
                         When consensus library is not specified it will be automatically composed from RepeatModeler output
-  -rm [RepeatMasker table], --rm-table [RepeatMasker table]
+  -L [RepeatMasker table], --rm-table [RepeatMasker table]
                         specify repeat masker table to use, default none. Use with `-f coords` option only
   -sq [sequence.fasta], --sequence [sequence.fasta]
                         specify file name of sequences where to look for domains. Use with `-f orf` option only
