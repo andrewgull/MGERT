@@ -14,13 +14,13 @@
  
   `ftp://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/ORFfinder/linux-i64/ORFfinder.gz`
 
-- awk (usually is preinstalled on Linux systems)
+- [awk](https://en.wikipedia.org/wiki/AWK) (is a standard feature of most Unix-like operating systems)
 
 - [Python](https://www.python.org/) 3.5 or higher
-- Python libraries:
-    - pandas v0.21.0
-    - matplotlib v2.1.0
-    - Biopython v1.70
+- Python libraries (should be easy to install via [pip](https://pypi.org/project/pip/) or [anaconda](https://www.anaconda.com/)):
+    - [pandas v0.21.0](https://pandas.pydata.org/)
+    - [matplotlib v2.1.0](https://matplotlib.org/)
+    - [Biopython v1.70](https://biopython.org/)
 
 ### Short description
 
@@ -53,38 +53,49 @@ During the steps 3 & 4 the pipeline creates several diagnostic plots and calcula
 ```
 This command will create a configuration file *config.json* with all the necessary paths (see "Requirements" section) and filenames MGERT uses. MGERT will try to find all the paths automatically. Unless it couldn't find them, it will prompt a user to enter a path or a filename.
 
-   - Download full Conserved Domain collection from the NCBI website: follow the [link to the Conserved Domain Database](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd.shtml), click on the **Conserved Domains** menu and choose **FTP** in the drop-down list. You will be redirected to the FTP site where you will find **cdd.tar.gz** archive. You can download it using either browser or command line utility like `wget`.
-   
-     To extract specific file from the archive use standard command: 
-   
+   - To validate ORFs of found TEs fast, you should create a local version of Conserved Domain Database (CDD). 
+   To do this, download full Conserved Domain collection from the NCBI website: follow the [link to the Conserved Domain Database](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd.shtml), click on the **Conserved Domains** menu and choose **FTP** in the drop-down list. You will be redirected to the FTP site where you will find **cdd.tar.gz** archive. 
+   You can download it using either browser or command line utility like `wget`.    
+   To figure out what filename you need to extract corresponding [PSSM](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#CD_PSSM) file from the archive, go to [NCBI CDD](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd.shtml), type in the name of domain of interest (e.g. "RT")
+   click **Search** button and see a list of related domains (e.g. "RT_like", "RT_pepA17", "RT_nLTR_like" etc).
+   Clicking on any entry, you will see a short description, a hierarchy of related domains and their PSSM codes ("cd00304" for "RT_like") - and this code is exactly what you need.
+   So, to extract PSSM file for RT-domain, run the following command:
+
 ```
-tar -tvf cdd.tar.gz "filename.smp"
+tar -tvf cdd.tar.gz "cd00304.smp"
 ```
+      
+   - Create a simple [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) file that specifies PSSM-file - domain correspondence.
+   Below you can see the correspondence file used for [Penelope retroelements](https://www.ncbi.nlm.nih.gov/pubmed/16093704) analysis:
    
+   ```
+   cd00304.smp,RT
+   cd01648.smp,RT
+   pfam00078.smp,RT
+   pfam07727.smp,RT
+   pfam13966.smp,RT
+   cd01644.smp,RT
+   cd01709.smp,RT
+   cd10442.smp,EN
+   cd00719.smp,EN 
+   ```
     
-   - Second, make your local Conserved Domain Database (CDD): put [PSSM](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#CD_PSSM) files (with *\*smp* extension) to your working directory along with a CSV file specifying file - domain correspondence, and run MGERT with the following flag:
+   **Note:** TAB-delimited files are not supported yet.
+   
+   These files are used by MGERT to report only those ORFs that encodes for **both** domains (RT and EN) 
+   regardless of what actual PSSM file produced a hit.
+   
+   - Finally, make local CDD: put [PSSM](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#CD_PSSM) files (with *\*smp* extension) 
+   to your working directory along with a CSV file specifying file - domain correspondence, and run MGERT with the following flag:
 
 ```
 ./MGERT.py --make-cdd
 ```
 This command will create a directory *LocalCDD* with all the necessary files inside it and the path to this CDD will be added to the *config.json*.
 
+**Note:** 
 
 Now you can run the pipeline.
-
-Below you can see an example of file-domain correspondence table (no header)
-
-|               |    |
-|---------------|----|
-|  cd00304.smp  | RT |
-|  cd01648.smp  | RT |
-| pfam00078.smp | RT |
-| pfam07727.smp | RT |
-| pfam13966.smp | RT |
-|  cd01644.smp  | RT |
-|  cd01709.smp  | RT |
-|  cd10442.smp  | EN |
-|  cd00719.smp  | EN |
 
 
 #### Full pipeline run starting from *de novo* MGE search using RepeatModeler
