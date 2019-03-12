@@ -52,7 +52,8 @@ def which(program):
 
 def make_config():
     # make a dict to write to a json file (config.json)
-    file_units = ["domain"]
+    # file_units = ["domain"]
+    file_units = []
     soft_units = ["RepeatMasker", "RepeatModeler", "ORFfinder", "rpstblastn", "BuildDatabase", "bedtools", "makeprofiledb"]
 
     config_dict = dict.fromkeys(file_units + soft_units)
@@ -61,48 +62,49 @@ def make_config():
     for unit in soft_units:
         found_path = which(unit)
         if found_path is None:
-            print("%s not found on your computer. Enter a valid path to an executable file" % unit)
+            print("%s not found on your computer. Enter a valid path to an executable file (including the file itself)" % unit)
             given_path = Path(input("enter the path > "))
             while not given_path.is_file():
                 print("this path is invalid: file not found!")
                 given_path = Path(input("enter the path > "))
             config_dict[unit] = str(given_path)
-            print("Ok...")
+            # print("Ok...")
         else:
             print("%s found here - %s" % (unit, found_path))
             config_dict[unit] = found_path
-            print("OK...")
+            # print("OK...")
 
     # configure the paths to files which will be used in the pipeline
-    for unit in file_units:
+    if len(file_units) > 0:
+        for unit in file_units:
 
-        # separate action for repeat type
-        # if unit == "RepeatType":
-        #     config_dict[unit] = input("What repeats you're interested in? [LINE, Gypsy, Penelope]... > ")
-        #     print("OK...")
+            # separate action for repeat type
+            # if unit == "RepeatType":
+            #     config_dict[unit] = input("What repeats you're interested in? [LINE, Gypsy, Penelope]... > ")
+            #     print("OK...")
 
-        # separate action for Conserved Domain Database
-        # NB: this settings are valid only for RT domains
-        if unit == "domain":
-            domain_name = Path(input("Enter a name for Conserved Domain Database %s... > " % unit))
-            config_dict[unit] = str(domain_name)
-            print("OK...")
-
-        # separate action for prefix (species name) to added to all other files
-        elif unit == "prefix":
-            prefix = input("Enter a prefix for your files (species name) > ")
-            config_dict[unit] = prefix
-            print("OK...")
-
-        # and anything else
-        else:
-            unit_path = Path(input("Enter a path to %s... > " % unit))
-            if unit_path.is_file() or str(unit_path) == "skip":
-                config_dict[unit] = str(unit_path)
+            # separate action for Conserved Domain Database
+            # NB: this settings are valid only for RT domains
+            if unit == "domain":
+                domain_name = Path(input("Enter a name for Conserved Domain Database %s... > " % unit))
+                config_dict[unit] = str(domain_name)
                 print("OK...")
+
+            # separate action for prefix (species name) to added to all other files
+            elif unit == "prefix":
+                prefix = input("Enter a prefix for your files (species name) > ")
+                config_dict[unit] = prefix
+                print("OK...")
+
+            # and anything else
             else:
-                print("ERROR. No such file or your path is wrong!\nQuit")
-                sys.exit()
+                unit_path = Path(input("Enter a path to %s... > " % unit))
+                if unit_path.is_file() or str(unit_path) == "skip":
+                    config_dict[unit] = str(unit_path)
+                    print("OK...")
+                else:
+                    print("ERROR. No such file or your path is wrong!\nQuit")
+                    sys.exit()
 
     # add fixed file names and paths to the config
     # config_dict["RepeatMasker Output"] = config_dict["genome"][:-3] + ".out"
@@ -110,6 +112,7 @@ def make_config():
     config_dict["GetORF Output"] = "hitdata.xml"
     config_dict["ORFinder Input"] = "matches_w_hits.fa"
     config_dict["CENSOR Output"] = "Unknown_classified.fa"
+    config_dict["domain"] = "lCDD"
     # if you do not run makeCDD script, you have to add domain name
     config_dict["CDD"] = os.getcwd()+"/LocalCDD/" + config_dict["domain"]
 
@@ -1160,11 +1163,12 @@ def rmodeler(filename, cpus):
 
     # build database
     cmd = "%s -name %s.db -engine ncbi ref.fa" % (read_config("BuildDatabase"), ungzipped_filename)
+    print("Building RepeatModeler database. Command:\n%s" %cmd)
     os.system(cmd)
 
     # run RepeatModeler
-    print("run RepeatModeler on %s CPUs..." % cpus)
     cmd = "%s -engine ncbi -pa %s -database %s.db > RepMod.out" % (read_config("RepeatModeler"), cpus, ungzipped_filename)
+    print("run RepeatModeler on %s CPUs. Command:\n%s" % (cpus, cmd))
     os.system(cmd)
 
     # move file upwards (where it was initially)
@@ -1209,7 +1213,7 @@ def rmasker(filename, cpus, lib):
     # the actual bash command is as follows:
     # ~/RepeatMasker/RepeatMasker -lib $species"_AllPLEconsensi.fa" -pa 24 -s -no_is -nolow $species".fa" -u -gff > $species"RepMask.stdout" &&
     cmd = "%s -lib %s -pa %s -s -no_is -nolow %s -u -gff > %s" % (exe, lib, cpus, filename, out)
-    print("Full command:\n%s" % cmd)
+    print("Command:\n%s" % cmd)
     os.system(cmd)
     # Sadly RepeatMasker itself names the output files according to the scheme: 'genome.fna + out*' or 'genome.fna + ori.out*'
     # these several files are (plus to the genome basename): *.fai, *.masked, *.out, *.out.gff, *.tbl, *ori.out
@@ -1283,23 +1287,36 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
     :return: no
     """
     # check if the genome file has right extensions
-    if ".fna.gz" in genome_file:
+    if ".fna.gz" in genome_file or ".fasta.gz" in genome_file or ".fa.gz" in genome_file:
         # genome assembly is gzipped
         # add genome name to the config to use it in the following steps
         add_config("genome", genome_file)
         # we assume, that the genome file is called `genome.fna.gz`, so we can derive the prefix by cropping last seven characters
-        add_config("prefix", genome_file[:-7])
+        if "fna" in genome_file:
+            add_config("prefix", genome_file[:-7])
+        elif "fa" in genome_file:
+            add_config("prefix", genome_file[:-6])
+        elif "fasta" in genome_file:
+            add_config("prefix", genome_file[:-9])
+        # make dirname
         dirname = read_config("prefix")
-        # make name for RepeatMasker output
+        # make name for RepeatMasker output (crop only '.gz')
         add_config("RepeatMasker Output", genome_file[:-3] + ".out")
-    elif ".fna" in genome_file and ".gz" not in genome_file:
-        add_config("prefix", genome_file[:-4])
+
+    elif ".fna" in genome_file or ".fa" in genome_file or ".fasta" in genome_file and ".gz" not in genome_file:
+        if ".fna" in genome_file:
+            add_config("prefix", genome_file[:-4])
+        elif ".fa" in genome_file:
+            add_config("prefix", genome_file[:-3])
+        elif ".fasta" in genome_file:
+            add_config("prefix", genome_file[:-6])
+
         add_config("genome", genome_file + ".gz")
         dirname = read_config("prefix")
         add_config("RepeatMasker Output", genome_file + ".out")
         genome_file = genome_file + '.gz'
     else:
-        print("Error! It seems the genome assembly has wrong name.\nCheck if it has '.fna' or '.fna.gz' extension")
+        print("Error! It seems the genome assembly has wrong name.\nIt should have either '.fna/.fa/.fasta' or '.fna.gz/.fa.gz/.fasta.gz' extension")
         sys.exit()
 
     ### CREATE A PROPER NAME FOR ORFinder Input
@@ -1484,7 +1501,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.21')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.22')
 
     args = parser.parse_args()
 

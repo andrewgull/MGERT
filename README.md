@@ -41,6 +41,11 @@ During the steps 3 & 4 the pipeline creates several diagnostic plots and calcula
 
 ![flowchart](flowchart.png)
 
+
+### Installation
+
+MGERT doesn't require special installation, just make `MGERT.py` executable and add it the `PATH` variable.
+
 ### Usage examples
 
 
@@ -55,7 +60,7 @@ This command will create a configuration file *config.json* with all the necessa
 
    - To validate ORFs of found TEs fast, you should create a local version of Conserved Domain Database (CDD). 
    To do this, download full Conserved Domain collection from the NCBI website: follow the [link to the Conserved Domain Database](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd.shtml), click on the **Conserved Domains** menu and choose **FTP** in the drop-down list. You will be redirected to the FTP site where you will find **cdd.tar.gz** archive. 
-   You can download it using either browser or command line utility like `wget`.    
+   You can download it using either browser or command line utility like `wget` (in the latter case use the direct link `ftp://ftp.ncbi.nih.gov/pub/mmdb/cdd/cdd.tar.gz`).    
    To figure out what filename you need to extract corresponding [PSSM](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#CD_PSSM) file from the archive, go to [NCBI CDD](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd.shtml), type in the name of domain of interest (e.g. "RT")
    click **Search** button and see a list of related domains (e.g. "RT_like", "RT_pepA17", "RT_nLTR_like" etc).
    Clicking on any entry, you will see a short description, a hierarchy of related domains and their PSSM codes ("cd00304" for "RT_like") - and this code is exactly what you need.
@@ -123,17 +128,26 @@ If consensus library is not specified, it will be automatically generated from t
 
 Furthermore, after this step a table with descriptive statistics and a histogram of repeats' lengths will be generated (shown below)
 
-|       |         |
-|-------|---------|
-| count | 81848.0 |
-| mean  | 1380.6  |
-| std   | 1987.7  |
-| min   | 12.0    |
-| 25%   | 152.0   |
-| 50%   | 446.0   |
-| 75%   | 1945.0  |
-| max   | 27686.0 |
+```
+count   81848.0
+mean    1380.6
+std     1987.7
+min     12.0
+25%     152.0
+50%     446.0
+75%     1945.0
+max     27686.0
+```
 
+where:
+ - *count* - number of found repeats/hits;
+ - *mean* - mean length of found repeat/hit;
+ - *std* - standard deviation;
+ - *min* - minimal length of found repeat/hit;
+ - *25%* - the 25th percentile (the 1st quartile) of length of found repeats/hits;
+ - *50%* - the 50th percentile (the 2nd quartile or median) of length of found repeats/hits;
+ - *75%* - the 75th percentile (the 3rd quartile) of length of found repeats/hits;
+ - *max* - maximum length of found repeats/hits.
 
 ![histogram](hist.png)
 
@@ -179,7 +193,7 @@ optional arguments:
   -C, --censor          use CENSOR for additional classification or not
   -o, --ori             if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file
   -m M, --merge M       merge all hits within M bp into a single entry. Default 500 bp
-  -e [real], --e_value [real]
+  -e [real], --e-value [real]
                         set expectation value (E). Default 0.01
   -c [integer], --start-codon [integer]
                         ORF start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation codons; 2 = any sense codon; Default 0
@@ -187,7 +201,7 @@ optional arguments:
                         set minimum length of ORF, default 1000 bp
   -s [plus/minus/both], --strand [plus/minus/both]
                         output ORFs on specified strand only. Default 'plus'
-  -g [integer], --genetic_code [integer]
+  -g [integer], --genetic-code [integer]
                         genetic code to use (1-31, Default 1). See http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi for details.
   -le [500], --left-end [500]
                         length of ORFs' left flanking region. Default 500 bp
