@@ -58,6 +58,8 @@ MGERT doesn't require special installation, just make `MGERT.py` executable and 
 ```
 This command will create a configuration file *config.json* with all the necessary paths (see "Requirements" section) and filenames MGERT uses. MGERT will try to find all the paths automatically. Unless it couldn't find them, it will prompt a user to enter a path or a filename.
 
+After the configuration step you may run MGERT with the option `--test` to check out whether everything works as it supposed to on a toy data set.
+
    - To validate ORFs of found TEs fast, you should create a local version of Conserved Domain Database (CDD). 
    To do this, download full Conserved Domain collection from the NCBI website: follow the [link to the Conserved Domain Database](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd.shtml), click on the **Conserved Domains** menu and choose **FTP** in the drop-down list. You will be redirected to the FTP site where you will find **cdd.tar.gz** archive. 
    You can download it using either browser or command line utility like `wget` (in the latter case use the direct link `ftp://ftp.ncbi.nih.gov/pub/mmdb/cdd/cdd.tar.gz`).    
@@ -70,23 +72,22 @@ This command will create a configuration file *config.json* with all the necessa
 tar -tvf cdd.tar.gz "cd00304.smp"
 ```
       
-   - Create a simple [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) file that specifies PSSM-file - domain correspondence.
+   - Create a simple [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) file (either comma or TAB delimited) that specifies PSSM-file - domain correspondence.
    Below you can see the correspondence file used for [Penelope retroelements](https://www.ncbi.nlm.nih.gov/pubmed/16093704) analysis:
    
    ```
-   cd00304.smp,RT
-   cd01648.smp,RT
-   pfam00078.smp,RT
-   pfam07727.smp,RT
-   pfam13966.smp,RT
-   cd01644.smp,RT
-   cd01709.smp,RT
-   cd10442.smp,EN
-   cd00719.smp,EN 
+   cd00304.smp  RT
+   cd01648.smp  RT
+   pfam00078.smp    RT
+   pfam07727.smp    RT
+   pfam13966.smp    RT
+   cd01644.smp  RT
+   cd01709.smp  RT
+   cd10442.smp  EN
+   cd00719.smp  EN 
    ```
     
-   **Note:** TAB-delimited files are not supported yet.
-   
+ 
    These files are used by MGERT to report only those ORFs that encodes for **both** domains (RT and EN) 
    regardless of what actual PSSM file produced a hit.
    
