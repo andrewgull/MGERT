@@ -878,7 +878,7 @@ def rps_blast(in_file, cdd, smp_table='', e_value=0.01, threads=1, outprefix="ma
 
     xml_prefix = mge_name + xml_prefix
 
-    print("RPS-BLAST...")
+    print("running RPS-BLAST...")
     # print("CDD location set as %s" % cdd)
     xml_file = xml_prefix + str(e_value)[2:] + ".xml"
 
@@ -1294,7 +1294,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         # we assume, that the genome file is called `genome.fna.gz`, so we can derive the prefix by cropping last seven characters
         if "fna" in genome_file:
             add_config("prefix", genome_file[:-7])
-        elif "fa" in genome_file:
+        elif "fa" in genome_file and "fasta" not in genome_file:
             add_config("prefix", genome_file[:-6])
         elif "fasta" in genome_file:
             add_config("prefix", genome_file[:-9])
@@ -1306,7 +1306,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
     elif ".fna" in genome_file or ".fa" in genome_file or ".fasta" in genome_file and ".gz" not in genome_file:
         if ".fna" in genome_file:
             add_config("prefix", genome_file[:-4])
-        elif ".fa" in genome_file:
+        elif ".fa" in genome_file and "fasta" not in genome_file:
             add_config("prefix", genome_file[:-3])
         elif ".fasta" in genome_file:
             add_config("prefix", genome_file[:-6])
@@ -1424,7 +1424,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
 
         if dom_table == '':
             # no smp table provided
-            print("You didn't provide smp table.\nTrying to look in the config file...")
+            print("Looking for domains table in the config file...")
             try:
                 dom_table = read_config("cd_table")
                 print("OK...")
