@@ -1541,6 +1541,11 @@ if __name__ == '__main__':
             except FileNotFoundError:
                 print("Error! Could't find test_dataset directory! Quit.")
                 sys.exit()
+            try:
+                shutil.copyfile("../config.json", "./config.json")
+            except FileNotFoundError:
+                print("Error! config.json not found, have you configured the pipeline?\nQuit.")
+                sys.exit()
             # run the pipeline
             pipe(genome_file="test_scaffold.fasta.gz", mge_type="CR1", threads=multiprocessing.cpu_count())
             print("Test report:\nSuccess! Everything works fine.")
