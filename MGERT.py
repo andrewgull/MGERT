@@ -12,6 +12,8 @@ import sys
 import json
 import csv
 import shutil
+import tarfile
+import multiprocessing
 from pathlib import Path
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
@@ -157,12 +159,12 @@ def make_local_cdd(dir_for_cd="LocalCDD"):
         os.mkdir(dir_for_cd)
 
     # check if smp table exists and move it
-    cd_table = glob.glob("*.csv")
+    cd_table = glob.glob("*.[c,t]sv")
     if len(cd_table) == 0:
-        print("no smp table is found...")
+        print("No correspondence table is found...")
         #print("assume there is only one CD type...")
     else:
-        print("smp table is found and added to the config...")
+        print("Correspondence table is found and added to the config...")
         new_path = workdir + "/" + dir_for_cd +"/" + cd_table[0]
         shutil.move(cd_table[0], new_path)
         add_config("cd_table", new_path)
@@ -888,16 +890,33 @@ def rps_blast(in_file, cdd, smp_table='', e_value=0.01, threads=1, outprefix="ma
 
     # read a table of CD groupings (assume it is tab delimited)
     # cdgroups = "doms.txt"
+
+    def read_and_guess(tabfile):
+        """
+        A function to read CSV file adn to guess the delimiter
+        :param tabfile: csv file
+        :return: csv file as a list of rows
+        """
+        with open(tabfile, 'r') as f:
+            dialect = csv.Sniffer().sniff(f.read(1024), delimiters="\t,")
+            f.seek(0)
+            reader = csv.reader(f, dialect)
+            tab = [r for r in reader]
+        return tab
+
     if smp_table == '':
         try:
-            reader = csv.reader(open(read_config('cd_table')))
+            group_tab = read_and_guess(read_config('cd_table'))
+            #reader = csv.reader(open(read_config('cd_table')))
         except KeyError:
             print("No smp table found in the config file!")
             smptable = input("Type a path to smp table > ")
-            reader = csv.reader(open(smptable))
+            #reader = csv.reader(open(smptable))
+            group_tab = read_and_guess(read_config('cd_table'))
     else:
-        reader = csv.reader(open(smp_table))
-    group_tab = [row for row in reader]
+        group_tab = read_and_guess(smp_table)
+        #reader = csv.reader(open(smp_table))
+    #group_tab = [row for row in reader]
     group_label = set([row[1] for row in group_tab])
     group_dict = {}
     for l in group_label:
@@ -1475,6 +1494,7 @@ if __name__ == '__main__':
 
     #optional group
     excl_group = optional.add_mutually_exclusive_group()
+    optional.add_argument("--test", action="store_true", help="testing runs on a toy data set")
     optional.add_argument("-cd", "--cd-table", type=str, metavar="[domains.csv]", help="comma delimited file with smp files and their grouping", default="")
     optional.add_argument("-f", "--from-stage", type=str, metavar="[cons/coords/orfs/flanks]", help="specify the step from which the pipeline should start. 'consensus' - get consensus sequences; "
                                                                                  "'coords' - get sequences; "
@@ -1501,7 +1521,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.22')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.4.01')
 
     args = parser.parse_args()
 
@@ -1510,6 +1530,23 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit()
         # if one specified configuration
+
+    if args.test:
+        if os.path.isfile("./test_dataset.tgz"):
+            print("Run MGERT on small dataset, it may take a while...")
+            test_tar = tarfile.open("test_dataset.tgz", "r")
+            test_tar.extractall()
+            try:
+                os.chdir("./test_dataset")
+            except FileNotFoundError:
+                print("Error! Could't find test_dataset directory! Quit.")
+                sys.exit()
+            # run the pipeline
+            pipe(genome_file="test_scaffold.fasta.gz", mge_type="CR1", threads=multiprocessing.cpu_count())
+            print("Test report:\nSuccess! Everything works fine.")
+        else:
+            print("Error! Test dataset not found! Quit.")
+            sys.exit()
 
     if args.check_types:
         check_types(seq_file=args.check_types)
