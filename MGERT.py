@@ -1521,7 +1521,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.4.01')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.4.2')
 
     args = parser.parse_args()
 
@@ -1547,6 +1547,7 @@ if __name__ == '__main__':
                 print("Error! config.json not found, have you configured the pipeline?\nQuit.")
                 sys.exit()
             # run the pipeline
+            make_local_cdd(dir_for_cd="LocalCDD")
             pipe(genome_file="test_scaffold.fasta.gz", mge_type="CR1", threads=multiprocessing.cpu_count())
             print("Test report:\nSuccess! Everything works fine.")
         else:
