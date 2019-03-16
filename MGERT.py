@@ -1532,6 +1532,10 @@ if __name__ == '__main__':
         # if one specified configuration
 
     if args.test:
+        # MGERT ungzips test_dataset.tgz; then goes to test_dataset
+        # copies the config from the dir above (the pipeline has to be configured)
+        # MGERT runs make_local_cdd
+        # MGERT runs itself
         if os.path.isfile("./test_dataset.tgz"):
             print("Run MGERT on small dataset, it may take a while...")
             test_tar = tarfile.open("test_dataset.tgz", "r")
