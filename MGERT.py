@@ -305,7 +305,7 @@ def repeat_collector(filename, word, merge=False):
         if merge:
             cmd = "mv " + word + "_consensi.fa.classified" + " All_" + word + "_consensi.fa"
             os.system(cmd)
-            print("Your repeat consensi file was renamed")
+            print("Your repeat consensuses file was renamed")
             # sys.exit()
         else:
             sys.exit()
@@ -1281,7 +1281,7 @@ def translator(seq_obj, gcode=1):
 # The MGERT pipeline itself
 
 
-def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='', stage=1, threads=1, censor=False, pandas=False, ori=False, merge=0, l=1000, e=0.01, c=0, strnd="plus", g=1, le=500, re=500):
+def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='', stage=1, to_stage=5, threads=multiprocessing.cpu_count(), censor=False, pandas=False, ori=False, merge=0, l=1000, e=0.01, c=0, strnd="plus", g=1, le=500, re=500):
     """
     a function to run the whole pipeline
     :param genome_file: a genome assembly file
@@ -1356,9 +1356,12 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         print("1/5. Starting RepeatModeler pipeline...\nNumber of CPUs - %s" % str(threads))
         rmodeler(genome_file, threads)
         # when rmodeler finished, it chdir back
+        # if to_stage equals stage, stop
+        if to_stage == stage:
+            print("Stage 1 finished.")
+            sys.exit()
         stage += 1  # stage = 2
         # print("%s search started..." % mge_type)
-
     # add MGE type to the config
     add_config(unit="RepeatType", val=mge_type)
 
@@ -1394,6 +1397,10 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         else:
             # if user specified the library use it instead
             rmasker(genome_file, str(threads), lib=lib)
+        # if to_stage equals stage, stop
+        if to_stage == stage:
+            print("Stage 2 finished.")
+            sys.exit()
         stage += 1
 
     if stage == 3:
@@ -1418,6 +1425,10 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         elif not pandas and not ori:
             get_seq(pandas=False, ori=False, merge=merge,rm_tab=rm_tab)
             # os.system("GetSeq.py -m %s" % str(merge))
+        # if to_stage equals stage, stop
+        if to_stage == stage:
+            print("Stage 3 finished.")
+            sys.exit()
         stage += 1
 
     if stage == 4:
@@ -1461,6 +1472,11 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         # write them; filename is made by adding "a" to the suffix of checked ORFs
         f = read_config("ORFinder Output Checked")+"a"
         SeqIO.write(translated_orfs, f, "fasta")
+
+        # if to_stage equals stage, stop
+        if to_stage == stage:
+            print("Stage 4 finished.")
+            sys.exit()
         stage += 1
 
     if stage == 5:
@@ -1499,9 +1515,10 @@ if __name__ == '__main__':
     optional.add_argument("-f", "--from-stage", type=str, metavar="[cons/coords/orfs/flanks]", help="specify the step from which the pipeline should start. 'consensus' - get consensus sequences; "
                                                                                  "'coords' - get sequences; "
                                                                                  "'orfs' - get ORFs; flanks - add flanking sequences to CDS.\nDefault 'rmod'", default="rmod")
+    optional.add_argument("-S", "--to-stage", type=str, metavar="[rmod/cons/coords/orf/flanks]", help="specify the step up to which the pipeline should run.", default="flanks")
     #optional.add_argument("-k", "--check_types", action="store_true", help="Print out all the types of MGE found in the RepeatModeler output")
     optional.add_argument("-k", "--check-types", type=str, metavar="[consensus file]", help="Print out all the types of MGE found in the RepeatModeler output")
-    optional.add_argument("-t", "--threads", type=int, metavar="[integer]", help="set number of threads. Default 1", default=1)
+    optional.add_argument("-t", "--threads", type=int, metavar="[integer]", help="set number of threads. Default - all CPUs available", default=1)
     optional.add_argument("-C", "--censor", action="store_true", help="use CENSOR for additional classification or not")
     optional.add_argument("-o", "--ori", action="store_true", help="if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file", default=False)
     # optional.add_argument("-d", "--pandas", action="store_false", help="run GetSeq with pandas (can be very slow)", default=False)
@@ -1521,7 +1538,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.4.2')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.5.6')
 
     args = parser.parse_args()
 
@@ -1556,7 +1573,8 @@ if __name__ == '__main__':
             print("Test finished:\nSuccess! Everything works fine.")
             sys.exit()
         else:
-            print("Error! Test dataset not found! Quit.")
+            print("Error! Test dataset not found! Try to put test_dataset.tgz in the current working directory "
+                  " and run 'MGERT.py --test' again.")
             sys.exit()
 
     if args.check_types:
@@ -1586,32 +1604,47 @@ if __name__ == '__main__':
         stage = 1
     elif args.from_stage == "cons" or args.from_stage == "consensus":
         stage = 2
-    elif args.from_stage == "coords":
+    elif args.from_stage == "coords" or args.from_stage == "coordinates":
         stage = 3
     elif args.from_stage == "orfs" or args.from_stage == "orf":
         stage = 4
-    elif args.from_stage == "flanks":
+    elif args.from_stage == "flanks" or args.from_stage == "flank":
         stage = 5
     else:
         print("Wrong stage name!")
+        sys.exit()
+
+    # recode 'to_stage' parameter
+    if args.to_stage == "rmod":
+        tostage = 1
+    elif args.to_stage == "cons" or args.to_stage == "consensus":
+        tostage = 2
+    elif args.to_stage == "coords" or args.to_stage == "coordinates":
+        tostage = 3
+    elif args.to_stage == "orfs" or args.to_stage == "orf":
+        tostage = 4
+    elif args.to_stage == "flanks" or args.to_stage == "flank":
+        tostage = 5
+    else:
+        print("Wrong 'to stage' name!")
         sys.exit()
 
     if args.censor:
         # print("Standard mode, with CENSOR")
         # get genome file
         # genome = read_config("genome", home=True)
-        pipe(genome_file=genome, mge_type=mge, stage=stage, seq_for_dom=args.sequence, threads=args.threads, censor=True, ori=args.ori, merge=args.merge,
+        pipe(genome_file=genome, mge_type=mge, stage=stage, to_stage=tostage, seq_for_dom=args.sequence, threads=args.threads, censor=True, ori=args.ori, merge=args.merge,
              l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, rm_tab=args.rm_table)
     elif args.rm_library:
         # print("Standard mode, with specified library")
         # get genome file
         # genome = read_config("genome", home=True)
-        pipe(genome_file=genome, mge_type=mge, stage=2, seq_for_dom=args.sequence, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
+        pipe(genome_file=genome, mge_type=mge, stage=2, to_stage=tostage, seq_for_dom=args.sequence, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
              l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, lib=args.rm_library, rm_tab=args.rm_table)
 
     else:
         # print("Standard mode")
         # get genome file
         # genome = read_config("genome", home=True)
-        pipe(genome_file=genome, mge_type=mge, stage=stage, seq_for_dom=args.sequence, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
+        pipe(genome_file=genome, mge_type=mge, stage=stage, to_stage=tostage, seq_for_dom=args.sequence, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
              l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, rm_tab=args.rm_table)
