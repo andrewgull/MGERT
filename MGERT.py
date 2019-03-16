@@ -1553,7 +1553,8 @@ if __name__ == '__main__':
             # run the pipeline
             make_local_cdd(dir_for_cd="LocalCDD")
             pipe(genome_file="test_scaffold.fasta.gz", mge_type="CR1", threads=multiprocessing.cpu_count())
-            print("Test report:\nSuccess! Everything works fine.")
+            print("Test finished:\nSuccess! Everything works fine.")
+            sys.exit()
         else:
             print("Error! Test dataset not found! Quit.")
             sys.exit()
