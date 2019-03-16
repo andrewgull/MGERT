@@ -172,6 +172,24 @@ Specify fasta file with sequences where to look for conserved domains and run th
 
 After this step a table with descriptive statistics and a histogram of repeats' lengths will be generated as well.
 
+#### Define the stage after which the pipeline should stop.
+
+Imagine, you want to run RepeatModeler only in order to check what types of TEs it will find. In this case run the command:
+
+```
+./MGERT.py --assembly genome.fna.gz --to-stage rmod
+
+./MGERT.py --check-types ./genome.fna/consensi.fa.classified
+
+```
+
+To stop MGERT after RepeatMasker run, use:
+
+```
+./MGERT.py --assembly genome.fna.gz -T Penelope --to-stage coordinates
+
+``` 
+
 ### List of arguments
 
 ```
