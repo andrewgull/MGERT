@@ -320,7 +320,7 @@ def repeat_collector(filename, word, merge=False):
 
 def censor_parser(url):
     """
-    censor_parser reads and parses CENSOR html output
+    censor_parser reads and parses CENSOR html output (either file or URL)
     and renames unclassified consensuses from RepeatModeler
     arg: unknown sequences file
     """
@@ -331,7 +331,14 @@ def censor_parser(url):
     # 'http://www.girinst.org/cgi-bin/censor/show_results.cgi?id=79886&lib=root'
     # url = input("CENSOR output URL > ")
 
-    parsed = parse(urlopen(url))
+    if "html" in url:
+        # that's a file
+        parsed = parse(url)
+    else:
+        # it's an URL, probably it contains 'girinst.org'
+        parsed = parse(urlopen(url))
+
+    # parsed = parse(urlopen(url))
     doc = parsed.getroot()
     tables = doc.findall('.//table')
     text_tables = [tables[i].text_content().split(' ') for i in range(len(tables))]
@@ -386,11 +393,11 @@ def get_cons(mge_type='', censor=False, url='', unknown=False, recollect=False, 
         # collect repeats of interest
         repeat_collector(filenm, mge_type)
         # collect Unknown repeats
-        repeat_collector(filenm, "Unknown")
+        # repeat_collector(filenm, "Unknown")
         # print("Now you may run CENSOR -> http://www.girinst.org/censor/")
     elif censor:
         censor_parser(url)
-        print("CENSOR output has been parsed and your TEs have been collected")
+        # print("CENSOR output has been parsed and your TEs have been collected")
     elif unknown:
         filenm = read_config("RepeatModeler Output")
         reptype = "Unknown"
@@ -1356,6 +1363,9 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         print("1/5. Starting RepeatModeler pipeline...\nNumber of CPUs - %s" % str(threads))
         rmodeler(genome_file, threads)
         # when rmodeler finished, it chdir back
+        # collect Unknown repeats
+        filenm = read_config("RepeatModeler Output")
+        repeat_collector(filenm, "Unknown")
         # if to_stage equals stage, stop
         if to_stage == stage:
             print("Stage 1 finished.")
@@ -1366,6 +1376,10 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
     add_config(unit="RepeatType", val=mge_type)
 
     if stage == 2:
+        try:
+            read_config("RepeatType")
+        except KeyError:
+            add_config(unit="RepeatType", val=mge_type)
         # change "RepeatModeler Output" in the config
         # add_config(unit="RepeatModeler Output", val=mge_type + "_consensi.fa.classified")
         # go to 'prefix' dirname again
@@ -1380,7 +1394,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
             print("2/5. Collecting user defined consensuses...")
             get_cons(mge_type=mge_type, standard=True)
             if censor:
-                url = input("CENSOR output URL > ")
+                url = input("CENSOR output URL/HTML file > ")
                 get_cons(censor=True, url=url)
                 get_cons(mge_type=mge_type, recollect=True)
             else:
