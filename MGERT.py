@@ -1291,7 +1291,7 @@ def translator(seq_obj, gcode=1):
 # The MGERT pipeline itself
 
 
-def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='', stage=1, to_stage=5, threads=multiprocessing.cpu_count(), censor=False, pandas=False, ori=False, merge=0, l=1000, e=0.01, c=0, strnd="plus", g=1, le=500, re=500):
+def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='', stage=1, to_stage=5, threads=multiprocessing.cpu_count(), censor="no", pandas=False, ori=False, merge=0, l=1000, e=0.01, c=0, strnd="plus", g=1, le=500, re=500):
     """
     a function to run the whole pipeline
     :param genome_file: a genome assembly file
@@ -1393,14 +1393,19 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
 
         if lib == "":
             # no library specified - collect repeats consensi
-            # next step -> GetCons
             print("2/5. Collecting user defined consensuses...")
             get_cons(mge_type=mge_type, standard=True)
-            if censor:
+            if censor == None:
+                # no argument passed
                 url = input("CENSOR output URL/HTML file > ")
                 get_cons(censor=True, url=url)
                 get_cons(mge_type=mge_type, recollect=True)
-            else:
+            elif '.html' in censor:
+                # html file provided after '--censor'
+                url = censor
+                get_cons(censor=True, url=url)
+                get_cons(mge_type=mge_type, recollect=True)
+            elif censor == 'no':
                 # if no censor, then no recollect
                 # rename initial file into final one
                 # reptype = read_config("RepeatType")
@@ -1545,7 +1550,7 @@ if __name__ == '__main__':
     #optional.add_argument("-k", "--check_types", action="store_true", help="Print out all the types of MGE found in the RepeatModeler output")
     optional.add_argument("-k", "--check-types", type=str, metavar="[consensus file]", help="Print out all the types of MGE found in the RepeatModeler output")
     optional.add_argument("-t", "--threads", type=int, metavar="[integer]", help="set number of threads. Default - all CPUs available", default=multiprocessing.cpu_count())
-    optional.add_argument("-C", "--censor", action="store_true", help="use CENSOR for additional classification or not")
+    optional.add_argument("-C", "--censor", type=str, nargs='?', metavar="[]", help="use CENSOR for additional classification or not", default='no')
     optional.add_argument("-o", "--ori", action="store_true", help="if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file", default=False)
     # optional.add_argument("-d", "--pandas", action="store_false", help="run GetSeq with pandas (can be very slow)", default=False)
     optional.add_argument("-m", "--merge", type=int, metavar="M", help="merge all hits within M bp into a single entry. Default 500 bp", default=500)
@@ -1655,22 +1660,22 @@ if __name__ == '__main__':
         print("Wrong 'to stage' name!")
         sys.exit()
 
-    if args.censor:
+    if args.censor == None or isinstance(args.censor, str):
         # print("Standard mode, with CENSOR")
         # get genome file
         # genome = read_config("genome", home=True)
-        pipe(genome_file=genome, mge_type=mge, stage=stage, to_stage=tostage, seq_for_dom=args.sequence, threads=args.threads, censor=True, ori=args.ori, merge=args.merge,
+        pipe(genome_file=genome, mge_type=mge, stage=stage, to_stage=tostage, seq_for_dom=args.sequence, threads=args.threads, censor=args.censor, ori=args.ori, merge=args.merge,
              l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, rm_tab=args.rm_table)
     elif args.rm_library:
         # print("Standard mode, with specified library")
         # get genome file
         # genome = read_config("genome", home=True)
-        pipe(genome_file=genome, mge_type=mge, stage=2, to_stage=tostage, seq_for_dom=args.sequence, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
+        pipe(genome_file=genome, mge_type=mge, stage=2, to_stage=tostage, seq_for_dom=args.sequence, threads=args.threads, censor='no', ori=args.ori, merge=args.merge,
              l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, lib=args.rm_library, rm_tab=args.rm_table)
 
     else:
         # print("Standard mode")
         # get genome file
         # genome = read_config("genome", home=True)
-        pipe(genome_file=genome, mge_type=mge, stage=stage, to_stage=tostage, seq_for_dom=args.sequence, threads=args.threads, censor=False, ori=args.ori, merge=args.merge,
+        pipe(genome_file=genome, mge_type=mge, stage=stage, to_stage=tostage, seq_for_dom=args.sequence, threads=args.threads, censor='no', ori=args.ori, merge=args.merge,
              l=args.min_length, e=args.e_value, c=args.start_codon, strnd=args.strand, g=args.genetic_code, le=args.left_end, re=args.right_end, rm_tab=args.rm_table)
