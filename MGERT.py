@@ -283,7 +283,7 @@ def add_config(unit, val, home=False):
     # print("New item was added to the config - %s" % unit)
 
 
-def repeat_collector(filename, word, merge=False):
+def repeat_collector(filename, word, merge=False, message=True):
     """
     repeat_collector extracts entries containing particular word in their headers (e.g. repeat type)
     from any fasta file (e.g. RepeatModeler output file - consensi.fa.classified)
@@ -300,22 +300,24 @@ def repeat_collector(filename, word, merge=False):
     extracted_sequences = [record for record in SeqIO.parse(f, 'fasta') if word in record.id]
 
     if len(extracted_sequences) == 0:
-        print("No %s sequences found in %s" % (word, filename))
+        # print("No %s sequences found in %s" % (word, filename))
+        print("No %s sequences found there" % word)
         # rename initial file into final one
         if merge:
             cmd = "mv " + word + "_consensi.fa.classified" + " All_" + word + "_consensi.fa"
             os.system(cmd)
             print("Your repeat consensuses file was renamed")
             # sys.exit()
-        else:
-            sys.exit()
+        # else:
+        #     sys.exit()
 
     fileout = word + "_" + filename.split("/")[-1]
     with open(fileout, 'w') as output:
         SeqIO.write(extracted_sequences, output, 'fasta')
     if word == "Unknown":
         add_config("Unknown repeats file", fileout)
-    print('%s Consensus TEs from RepeatModeler output have been collected' % word)
+    if message:
+        print('%s Consensus TEs from RepeatModeler output have been collected' % word)
 
 
 def censor_parser(url):
@@ -375,7 +377,8 @@ def merger(file_a, file_b, fill):
 
 def get_cons(mge_type='', censor=False, url='', unknown=False, recollect=False, merge=False, b_types=False, n_types=False, a_types=False, standard=False):
     """
-
+    Function to collect seqs from a file according to word in seqs' headers.
+    It is started several times inside the pipeline with different logical args
     :param censor: use CENSOR or not
     :param url: URL address of CENSOR output
     :param unknown: collect unknown sequences
@@ -400,21 +403,21 @@ def get_cons(mge_type='', censor=False, url='', unknown=False, recollect=False, 
         # print("CENSOR output has been parsed and your TEs have been collected")
     elif unknown:
         filenm = read_config("RepeatModeler Output")
-        reptype = "Unknown"
-        repeat_collector(filenm, reptype)
-        print("%s TEs have been collected" % reptype)
+        # reptype = "Unknown"
+        repeat_collector(filenm, "Unknown")
+        print("Unknown TEs have been collected")
     elif recollect:
         # reptype = read_config("RepeatType")
         fname = read_config("CENSOR Output")
-        repeat_collector(fname, mge_type, merge=True)
-        print("Collecting %s TEs from %s..." % (mge_type, fname))
+        repeat_collector(fname, mge_type, merge=False, message=False)
+        # print("Collecting %s TEs from %s..." % (mge_type, fname))
         file1 = mge_type + "_" + read_config("RepeatModeler Output")
         file2 = mge_type + "_" + read_config("CENSOR Output")
         merger(file1, file2, fill=mge_type)
-        print("%s TEs from newly classified sequences have been collected and merged with previous data set" % mge_type)
+        # print("%s TEs from newly classified sequences have been collected and merged with previous data set" % mge_type)
     elif merge:
-        # file1 = input("file #1 to merge > ")
-        # file2 = input("file #2 to merge > ")
+        # is never called throughout the pipeline
+
         file1 = mge_type + "_" + read_config("RepeatModeler Output")
         file2 = mge_type + "_" + read_config("CENSOR Output")
         out = merger(file1, file2, fill=read_config("RepeatType"))
@@ -1360,7 +1363,7 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         os.chdir(dirname)
 
         # run RepeatModeler
-        print("1/5. Starting RepeatModeler pipeline...\nNumber of CPUs - %s" % str(threads))
+        print("1/5. Starting RepeatModeler pipeline on %s CPUs" % str(threads))
         rmodeler(genome_file, threads)
         # when rmodeler finished, it chdir back
         # collect Unknown repeats
@@ -1403,14 +1406,23 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
                 # reptype = read_config("RepeatType")
                 cmd = "mv " + mge_type + "_consensi.fa.classified" + " All_" + mge_type + "_consensi.fa"
                 os.system(cmd)
-            print("All consensi found.\nStart RepeatMasker with the consensi as a library...\nNumber of CPUs - %s" % str(threads))
+            print("Start RepeatMasker with the selected consensuses as a library...\nNumber of CPUs - %s" % str(threads))
             # run RepeatMasker
             # if consensi library not specified, take it from RepeatModeler
             lib = "All_" + read_config("RepeatType") + "_consensi.fa"
-            rmasker(genome_file, str(threads), lib=lib)
+            if os.path.isfile(lib):
+                rmasker(genome_file, str(threads), lib=lib)
+            else:
+                print("Error! File %s not found.")
+                sys.exit()
         else:
-            # if user specified the library use it instead
-            rmasker(genome_file, str(threads), lib=lib)
+            if os.path.isfile(lib):
+                rmasker(genome_file, str(threads), lib=lib)
+                # if user specified the library use it instead
+                rmasker(genome_file, str(threads), lib=lib)
+            else:
+                print("Error! File %s not found.")
+                sys.exit()
         # if to_stage equals stage, stop
         if to_stage == stage:
             print("Stage 2 finished.")
@@ -1532,7 +1544,7 @@ if __name__ == '__main__':
     optional.add_argument("-S", "--to-stage", type=str, metavar="[rmod/cons/coords/orf/flanks]", help="specify the step up to which the pipeline should run.", default="flanks")
     #optional.add_argument("-k", "--check_types", action="store_true", help="Print out all the types of MGE found in the RepeatModeler output")
     optional.add_argument("-k", "--check-types", type=str, metavar="[consensus file]", help="Print out all the types of MGE found in the RepeatModeler output")
-    optional.add_argument("-t", "--threads", type=int, metavar="[integer]", help="set number of threads. Default - all CPUs available", default=1)
+    optional.add_argument("-t", "--threads", type=int, metavar="[integer]", help="set number of threads. Default - all CPUs available", default=multiprocessing.cpu_count())
     optional.add_argument("-C", "--censor", action="store_true", help="use CENSOR for additional classification or not")
     optional.add_argument("-o", "--ori", action="store_true", help="if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file", default=False)
     # optional.add_argument("-d", "--pandas", action="store_false", help="run GetSeq with pandas (can be very slow)", default=False)
@@ -1552,7 +1564,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.5.6')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.5.8')
 
     args = parser.parse_args()
 
