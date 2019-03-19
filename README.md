@@ -109,7 +109,7 @@ Now you can run the pipeline.
 The shortest way is to run MGERT with  *all-default* parameters (see "Parameters" section):
 
 ```
-./MGERT.py --mge-type Penelope --assembly genome.fna.gz
+./MGERT.py --mge-type %mge_name% --assembly genome.fna.gz
 ```
 This command runs search and retrieving of [Penelope](https://www.pnas.org/content/94/1/196) retrotransposons' ORFs and flanking regions in the genome assembly.
 
@@ -122,10 +122,10 @@ There are three possible steps to run the pipeline from (except the default one)
 Let's consider the situation when you already have a repeat library called, say, `Penelope_consensi.fasta` and you want to find instances of the repeats from the library in your assembly, and therefore there is no need to run *de novo* part of the pipeline. In this case simply type in the following command:
 
 ```bash
-./MGERT.py -T Penelope  --from-stage cons --lib Penelope_consensi.fasta
+./MGERT.py --mge-type Penelope  --from-stage cons --lib Penelope_consensi.fasta
 ```
 
-If consensus library is not specified, it will be automatically generated from the RepeatModeler output
+If consensus library is not specified, it will be automatically generated from the RepeatModeler output.
 
 Furthermore, after this step a table with descriptive statistics and a histogram of repeats' lengths will be generated (shown below)
 
