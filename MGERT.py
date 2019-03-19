@@ -729,7 +729,10 @@ def bed_tools(rm_file, ref_genome, ori=False, expansion=0, output_prefix="excise
     # make plot
     df = pd.read_table(rm_file + ".bed", header=None)
     length = df[2] - df[1] + 1
-    plot2 = length.hist(bins=bins)
+    plot2 = length.hist(color='g', alpha=0.5, bins=200)
+    plot2 = plt.xlabel("length, b.p.")
+    plot2 = plt.ylabel("count")
+    plot2 = plt.title("Histogram of consensus hits' lengths")
     fig2 = plot2.get_figure()
     fig2.savefig(output_prefix + str(expansion) + ".png")
     plt.close(fig2)
@@ -984,6 +987,9 @@ def rps_blast(in_file, cdd, smp_table='', e_value=0.01, threads=1, outprefix="ma
         # make some stat and plots (not for check only)
         hits_len = pd.Series([len(item) for item in hits_only_dna])
         plot = hits_len.hist(color='g', alpha=0.5, bins=200)
+        plot = plt.xlabel("length, b.p.")
+        plot = plt.ylabel("count")
+        plot = plt.title("Histogram of domain encoding sequences' lengths")
         fig = plot.get_figure()
         fig.savefig(outprefix + "_e" + str(e_value)[2:] + ".png")
         plt.close(fig)
@@ -1550,7 +1556,7 @@ if __name__ == '__main__':
     #optional.add_argument("-k", "--check_types", action="store_true", help="Print out all the types of MGE found in the RepeatModeler output")
     optional.add_argument("-k", "--check-types", type=str, metavar="[consensus file]", help="Print out all the types of MGE found in the RepeatModeler output")
     optional.add_argument("-t", "--threads", type=int, metavar="[integer]", help="set number of threads. Default - all CPUs available", default=multiprocessing.cpu_count())
-    optional.add_argument("-C", "--censor", type=str, nargs='?', metavar="[]", help="use CENSOR for additional classification or not", default='no')
+    optional.add_argument("-C", "--censor", type=str, nargs='?', metavar="[html file or URL-address]", help="use CENSOR for additional classification or not", default='no')
     optional.add_argument("-o", "--ori", action="store_true", help="if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file", default=False)
     # optional.add_argument("-d", "--pandas", action="store_false", help="run GetSeq with pandas (can be very slow)", default=False)
     optional.add_argument("-m", "--merge", type=int, metavar="M", help="merge all hits within M bp into a single entry. Default 500 bp", default=500)
@@ -1569,7 +1575,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.5.8')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.6.1')
 
     args = parser.parse_args()
 
