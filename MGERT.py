@@ -56,7 +56,7 @@ def make_config():
     # make a dict to write to a json file (config.json)
     # file_units = ["domain"]
     file_units = []
-    soft_units = ["RepeatMasker", "RepeatModeler", "ORFfinder", "rpstblastn", "BuildDatabase", "bedtools", "makeprofiledb"]
+    soft_units = ["RepeatMasker", "RepeatModeler", "ORFfinder", "rpstblastn", "bedtools", "makeprofiledb"]
 
     config_dict = dict.fromkeys(file_units + soft_units)
 
@@ -76,24 +76,24 @@ def make_config():
             config_dict[unit] = found_path
             # print("OK...")
         # special case - BuildDatabase
-        bd_dir = config_dict["RepeatModeler"]
-        bd_path = bd_dir[:-13] + "BuildDatabase"
-        if os.path.isfile(bd_path):
-            config_dict["BuildDatabase"] = bd_path
-            print("%s found here - %s" % (unit, bd_path))
-        else:
-            # try to do which()
-            bd_path = which("BuildDatabase")
-            if bd_path is None:
-                print("%s not found on your computer. Enter a valid path to an executable file (including the file itself)" % unit)
+    bd_dir = config_dict["RepeatModeler"]
+    bd_path = bd_dir[:-13] + "BuildDatabase"
+    if os.path.isfile(bd_path):
+        config_dict["BuildDatabase"] = bd_path
+        print("%s found here - %s" % (unit, bd_path))
+    else:
+        # try to do which()
+        bd_path = which("BuildDatabase")
+        if bd_path is None:
+            print("%s not found on your computer. Enter a valid path to an executable file (including the file itself)" % unit)
+            given_path = Path(input("Enter the path > "))
+            while not given_path.is_file():
+                print("This path is invalid: file not found!")
                 given_path = Path(input("Enter the path > "))
-                while not given_path.is_file():
-                    print("This path is invalid: file not found!")
-                    given_path = Path(input("Enter the path > "))
-                config_dict[unit] = str(given_path)
-            else:
-                print("%s found here - %s" % (unit, bd_path))
-                config_dict[unit] = bd_path
+            config_dict[unit] = str(given_path)
+        else:
+            print("%s found here - %s" % (unit, bd_path))
+            config_dict[unit] = bd_path
 
 
 
@@ -1596,7 +1596,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.6.1')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.6.2')
 
     args = parser.parse_args()
 
