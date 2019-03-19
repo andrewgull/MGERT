@@ -65,16 +65,37 @@ def make_config():
         found_path = which(unit)
         if found_path is None:
             print("%s not found on your computer. Enter a valid path to an executable file (including the file itself)" % unit)
-            given_path = Path(input("enter the path > "))
+            given_path = Path(input("Enter the path > "))
             while not given_path.is_file():
-                print("this path is invalid: file not found!")
-                given_path = Path(input("enter the path > "))
+                print("This path is invalid: file not found!")
+                given_path = Path(input("Enter the path > "))
             config_dict[unit] = str(given_path)
             # print("Ok...")
         else:
             print("%s found here - %s" % (unit, found_path))
             config_dict[unit] = found_path
             # print("OK...")
+        # special case - BuildDatabase
+        bd_dir = config_dict["RepeatModeler"]
+        bd_path = bd_dir[:-13] + "BuildDatabase"
+        if os.path.isfile(bd_path):
+            config_dict["BuildDatabase"] = bd_path
+            print("%s found here - %s" % (unit, bd_path))
+        else:
+            # try to do which()
+            bd_path = which("BuildDatabase")
+            if bd_path is None:
+                print("%s not found on your computer. Enter a valid path to an executable file (including the file itself)" % unit)
+                given_path = Path(input("Enter the path > "))
+                while not given_path.is_file():
+                    print("This path is invalid: file not found!")
+                    given_path = Path(input("Enter the path > "))
+                config_dict[unit] = str(given_path)
+            else:
+                print("%s found here - %s" % (unit, bd_path))
+                config_dict[unit] = bd_path
+
+
 
     # configure the paths to files which will be used in the pipeline
     if len(file_units) > 0:
