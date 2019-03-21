@@ -1593,7 +1593,8 @@ if __name__ == '__main__':
     optional.add_argument("-le", "--left-end", type=int, metavar="[500]", help="length of ORFs' left flanking region. Default 500 bp", default=500)
     optional.add_argument("-re", "--right-end", type=int, metavar="[500]", help="length of ORFs' right flanking region. Default 500 bp", default=500)
     excl_group.add_argument("-L", "--rm-library", type=str, metavar="[fasta file]", help="library for RepeatMasker (fasta format). Use with `-f cons` only.\n"
-                                                                              "When consensus library is not specified it will be automatically composed from RepeatModeler output", required=False, default="")
+                                                                              "When consensus library is not specified it will be automatically composed from RepeatModeler output"
+                                                                                         "according to the -T option", required=False, default="")
     excl_group.add_argument("-rm", "--rm-table", type=str, metavar="[RepeatMasker table]",
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",

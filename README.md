@@ -69,7 +69,7 @@ After the configuration step you may run MGERT with the option `--test` to check
    So, to extract PSSM file for RT-domain, run the following command:
 
 ```
-tar -tvf cdd.tar.gz "cd00304.smp"
+tar -zxvf cdd.tar.gz cd00304.smp
 ```
       
    - Create a simple [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) file (either comma or TAB delimited) that specifies PSSM-file - domain correspondence.
@@ -112,6 +112,10 @@ The shortest way is to run MGERT with  *all-default* parameters (see "Parameters
 ./MGERT.py --mge-type %mge_name% --assembly genome.fna.gz
 ```
 This command runs search and retrieving of [Penelope](https://www.pnas.org/content/94/1/196) retrotransposons' ORFs and flanking regions in the genome assembly.
+
+Note, that for subsequent runs of MGERT, you don't need to move and gzip the genome assembly file again. The only thing you 
+should care about is that the name of the directory where the assembly file is, were the same as the name of assembly itself
+(except extension) e.g. `./genome/genome.fna` 
 
 #### Pipeline run from an arbitrary step
 
