@@ -135,7 +135,7 @@ def make_config():
     config_dict["GetORF Output"] = "hitdata.xml"
     config_dict["ORFinder Input"] = "matches_w_hits.fa"
     config_dict["CENSOR Output"] = "Unknown_classified.fa"
-    config_dict["domain"] = "lCDD"
+    config_dict["domain"] = "CD"
     # if you do not run makeCDD script, you have to add domain name
     config_dict["CDD"] = os.getcwd()+"/LocalCDD/" + config_dict["domain"]
 
@@ -956,7 +956,8 @@ def rps_blast(in_file, cdd, smp_table='', e_value=0.01, threads=1, outprefix="ma
     for l in group_label:
         group_dict[l]=[r[0] for r in group_tab if l in r[1]]
 
-
+    print("Command:\n")
+    print('rpstblastn -db %s -query %s -out %s -evalue %i -outfmt 5 -num_threads %i' %(cdd, in_file, xml_file, e_value, threads))
     sbp.call(["rpstblastn", "-db", cdd, "-query", in_file, "-out", xml_file, "-evalue", str(e_value), "-outfmt", "5", "-num_threads", str(threads)])
     if not check:
         # add to config only if it is not ORF checking
@@ -1061,6 +1062,8 @@ def orf_finder(input_file, s=0, g=1, l=1000, strand="plus", nested=True):
     else:
         n = "false"
     stderr = open("ORFfinder.stderr", "w")
+    print("Command:\n")
+    print('ORFfinder -in %s -s %i -g %i -ml %i -n %s -strand %s -out %s.fa -outfmt 1' % (input_file, s,g, l, n, strand, output_prefix))
     sbp.call(["ORFfinder", "-in", input_file, "-s", str(s), "-g", str(g), "-ml", str(l), "-n", n, "-strand", strand, "-out", output_prefix + ".fa", "-outfmt", "1"], stderr=stderr)
     stderr.close()
 
@@ -1103,7 +1106,7 @@ def get_orf(sequence, cd_data, min_len, orf_in, strnd, start_codon, cd_tab='', e
 # Extender part
 
 
-def make_bed(cds_records, right_expand=500, left_expand=500):
+def make_bed(cds_records, right_expand=0, left_expand=0):
     """
     a function to make a list of lines formatted for bed file
     :param cds_records: a list of coding sequences
@@ -1152,12 +1155,12 @@ def make_bed(cds_records, right_expand=500, left_expand=500):
 
 def extender(genome_file, cds_file, left_elongation_value, right_elongation_value):
     """
-
-    :param genome_file:
-    :param cds_file:
-    :param left_elongation_value:
-    :param right_elongation_value:
-    :return:
+    a function to add left and right flanks of specified length
+    :param genome_file: genome assembly
+    :param cds_file: coding sequences
+    :param left_elongation_value: length of the left flank
+    :param right_elongation_value: length of the right flank
+    :return: no
     """
     if left_elongation_value == 0 and right_elongation_value == 0:
         # then do nothing
@@ -1544,18 +1547,22 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
             os.chdir(dirname)
         except FileNotFoundError:
             print("\n")
-
-        print("5/5. Adding flanking regions...")
-        cds = read_config("ORFinder Output Checked")
-        extender(genome_file=genome_file, cds_file=cds, left_elongation_value=le, right_elongation_value=re)
+        if le == 0 and re == 0:
+            print("Zero length of both flanks detected.\nSkip the 5th stage.")
+        else:
+            print("5/5. Adding flanking regions...")
+            cds = read_config("ORFinder Output Checked")
+            extender(genome_file=genome_file, cds_file=cds, left_elongation_value=le, right_elongation_value=re)
+            print("MGERT finished.")
 
 
 if __name__ == '__main__':
     my_message = "Mobile Genetic Elements Retrieving Tool (MGERT).\n" \
-                 "MGERT is a pipeline for retrieving coding sequences of mobile genetic elements from genomic assemblies\n" \
-                 "To make initial configuration run configuration script with: `MGERT.py --configure`\n"
+                 "MGERT is a pipeline for retrieving coding sequences of mobile genetic elements from genomic assemblies\n"
 
-    parser = argparse.ArgumentParser(description=my_message,  formatter_class=argparse.RawTextHelpFormatter, prog="MGERT", usage='%(prog)s -a genome.fna.gz -T Penelope [options]')
+
+    parser = argparse.ArgumentParser(description=my_message,  formatter_class=argparse.RawTextHelpFormatter,
+                                     prog="MGERT", usage='%(prog)s -a genome.fna.gz -T Penelope [options]')
     parser._action_groups.pop()
     #groups
     required = parser.add_argument_group('required arguments')
@@ -1582,7 +1589,7 @@ if __name__ == '__main__':
     optional.add_argument("-C", "--censor", type=str, nargs='?', metavar="[html file or URL-address]", help="use CENSOR for additional classification or not", default='no')
     optional.add_argument("-o", "--ori", action="store_true", help="if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file", default=False)
     # optional.add_argument("-d", "--pandas", action="store_false", help="run GetSeq with pandas (can be very slow)", default=False)
-    optional.add_argument("-m", "--merge", type=int, metavar="M", help="merge all hits within M bp into a single entry. Default 500 bp", default=500)
+    optional.add_argument("-m", "--merge", type=int, metavar="[0]", help="merge all hits within M bp into a single entry. Default 0 bp (no merge)", default=0)
     optional.add_argument("-e", "--e-value", type=float, metavar="[real]", help="set expectation value (E). Default 0.01", default=0.01)
     optional.add_argument("-c", "--start-codon", type=int, metavar="[integer]", help="ORF start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation "
                                                                                                   "codons; 2 = any sense codon; Default 0", default=0)
@@ -1590,8 +1597,8 @@ if __name__ == '__main__':
     optional.add_argument("-s", "--strand", type=str, metavar="[plus/minus/both]", help="output ORFs on specified strand only. Default 'plus'", default="plus")
     optional.add_argument("-g", "--genetic-code", type=int, metavar="[integer]", help="genetic code to use (1-31, Default 1). "
                                                                                     "See http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi for details.", default=1)
-    optional.add_argument("-le", "--left-end", type=int, metavar="[500]", help="length of ORFs' left flanking region. Default 500 bp", default=500)
-    optional.add_argument("-re", "--right-end", type=int, metavar="[500]", help="length of ORFs' right flanking region. Default 500 bp", default=500)
+    optional.add_argument("-le", "--left-end", type=int, metavar="[0]", help="length of ORFs' left flanking region. Default 0 bp", default=0)
+    optional.add_argument("-re", "--right-end", type=int, metavar="[0]", help="length of ORFs' right flanking region. Default 0 bp", default=0)
     excl_group.add_argument("-L", "--rm-library", type=str, metavar="[fasta file]", help="library for RepeatMasker (fasta format). Use with `-f cons` only.\n"
                                                                               "When consensus library is not specified it will be automatically composed from RepeatModeler output"
                                                                                          "according to the -T option", required=False, default="")
@@ -1599,7 +1606,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.6.5')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.7.1')
 
     args = parser.parse_args()
 
