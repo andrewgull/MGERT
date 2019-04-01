@@ -44,7 +44,15 @@ During the steps 3 & 4 the pipeline creates several diagnostic plots and calcula
 
 ### Installation
 
-MGERT doesn't require special installation, just make `MGERT.py` executable and add it the `PATH` variable.
+Clone the repo:
+
+```
+git clone https://github.com/andrewgull/MGERT
+```
+
+Then add or link `MGERT.py` to a directory in the `PATH` variable.
+
+This is required to proper run of MGERT's self-testing mode.
 
 ### Usage examples
 
