@@ -3,6 +3,17 @@
 *MGERT* is a computational pipeline for easy retrieving of MGE's coding sequences of a particular family from genome assemblies.
 *MGERT* utilizes several established bioinformatic tools combined into single pipeline which hides different technical quirks from an inexperienced user.
 
+Table of contents:
+
+1. [ Requirements. ](#requirements)
+2. [ Short description. ](#short-description)
+3. [ Flowchart of the pipeline. ](#flowchart-of-mgert-pipeline)
+4. [ Installation ](#installation)
+5. [ Usage examples ](#usage-examples)
+6. [ List of arguments ](#list-of-arguments)
+
+
+<a name="requirements"></a>
 ### Requirements
 
 
@@ -22,6 +33,7 @@
     - [matplotlib v2.1.0](https://matplotlib.org/)
     - [Biopython v1.70](https://biopython.org/)
 
+<a name="short-description"></a>
 ### Short description
 
 The pipeline includes five steps:
@@ -37,23 +49,28 @@ You may run the pipeline from any of these steps, for instance, if you have your
 During the steps 3 & 4 the pipeline creates several diagnostic plots and calculates descriptive statistics on the found sequences (number, mean length, sd, median length, 25th and 75th length percentiles).
 
 
+<a name="flowchart-of-mgert-pipeline"></a>
 ### Flowchart of MGERT pipeline
 
 ![flowchart](flowchart.png)
 
 
+<a name="installation"></a>
 ### Installation
 
-Clone the repo:
+Clone the repository and run installation script (requires administrator permissions):
 
-```
+```bash
 git clone https://github.com/andrewgull/MGERT
+cd MGERT
+sudo ./install.sh
 ```
 
-Then add or link `MGERT.py` to a directory in the `PATH` variable.
+If you can't run installation script with sudo, you could place `MGERT.py` wherever you want, but you would be prompt 
+to enter a path to `test_dataset.tgz` when running `MGERT.py --test` (see below for details).
 
-This is required to proper run of MGERT's self-testing mode.
 
+<a name="usage-examples"></a>
 ### Usage examples
 
 
@@ -61,12 +78,15 @@ This is required to proper run of MGERT's self-testing mode.
 
    - First, run configuration script with the following command:
 
-```
+```bash
 ./MGERT.py --configure
 ```
-This command will create a configuration file *config.json* with all the necessary paths (see "Requirements" section) and filenames MGERT uses. MGERT will try to find all the paths automatically. Unless it couldn't find them, it will prompt a user to enter a path or a filename.
+This command will create a configuration file *config.json* with all the necessary paths (see "Requirements" section) 
+and filenames MGERT uses. MGERT will try to find all the paths automatically. Unless it couldn't find them, it will 
+prompt a user to enter a path or a filename.
 
-After the configuration step you may run MGERT with the option `--test` to check out whether everything works as it supposed to on a toy data set.
+After the configuration step you may run MGERT with the option `--test` to check out whether everything works as 
+it supposed to on a toy data set (despite the size of the dataset, it can take a while).
 
    - To validate ORFs of found TEs fast, you should create a local version of Conserved Domain Database (CDD). 
    To do this, download full Conserved Domain collection from the NCBI website: follow the [link to the Conserved Domain Database](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd.shtml), click on the **Conserved Domains** menu and choose **FTP** in the drop-down list. You will be redirected to the FTP site where you will find **cdd.tar.gz** archive. 
@@ -76,7 +96,7 @@ After the configuration step you may run MGERT with the option `--test` to check
    Clicking on any entry, you will see a short description, a hierarchy of related domains and their PSSM codes ("cd00304" for "RT_like") - and this code is exactly what you need.
    So, to extract PSSM file for RT-domain, run the following command:
 
-```
+```bash
 tar -zxvf cdd.tar.gz cd00304.smp
 ```
       
@@ -102,7 +122,7 @@ tar -zxvf cdd.tar.gz cd00304.smp
    - Finally, make local CDD: put [PSSM](https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#CD_PSSM) files (with *\*smp* extension) 
    to your working directory along with a CSV file specifying file - domain correspondence, and run MGERT with the following flag:
 
-```
+```bash
 ./MGERT.py --make-cdd
 ```
 This command will create a directory *LocalCDD* with all the necessary files inside it and the path to this CDD will be added to the *config.json*.
@@ -116,7 +136,7 @@ Now you can run the pipeline.
 
 The shortest way is to run MGERT with  *all-default* parameters (see "Parameters" section):
 
-```
+```bash
 ./MGERT.py --mge-type Penelope --assembly genome.fna.gz
 ```
 This command runs search and retrieving of [Penelope](https://www.pnas.org/content/94/1/196) retrotransposons' ORFs and flanking regions in the genome assembly.
@@ -168,7 +188,7 @@ where:
 
 In the case when you have coordinates of repeats' matches (either in RepeatMasker output file format or BED file), you can run MGERT as follows:
 
-```
+```bash
 ./MGERT.py -T Penelope --from-stage coords --rm-table Penelope_consensi_matches.rm.out
 ```
 
@@ -178,7 +198,7 @@ After this step a table with descriptive statistics and a histogram of repeats' 
 
 Specify fasta file with sequences where to look for conserved domains and run the command:
 
-```
+```bash
 ./MGERT.py -T Penelope --from-stage orfs --sequence Penelope_matches_ORFs.fasta
 ```
 
@@ -188,7 +208,7 @@ After this step a table with descriptive statistics and a histogram of repeats' 
 
 Say, you want to run RepeatModeler only in order to check what types of TEs it will find. In this case run the command:
 
-```
+```bash
 ./MGERT.py --assembly genome.fna.gz --to-stage rmod
 
 ./MGERT.py --check-types ./genome.fna/consensi.fa.classified
@@ -197,11 +217,12 @@ Say, you want to run RepeatModeler only in order to check what types of TEs it w
 
 To stop MGERT after RepeatMasker run, use:
 
-```
+```bash
 ./MGERT.py --assembly genome.fna.gz -T Penelope --to-stage coordinates
 
 ``` 
 
+<a name="list-of-arguments"></a>
 ### List of arguments
 
 ```
