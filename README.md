@@ -109,7 +109,7 @@ Now you can run the pipeline.
 The shortest way is to run MGERT with  *all-default* parameters (see "Parameters" section):
 
 ```
-./MGERT.py --mge-type %mge_name% --assembly genome.fna.gz
+./MGERT.py --mge-type Penelope --assembly genome.fna.gz
 ```
 This command runs search and retrieving of [Penelope](https://www.pnas.org/content/94/1/196) retrotransposons' ORFs and flanking regions in the genome assembly.
 
@@ -178,7 +178,7 @@ After this step a table with descriptive statistics and a histogram of repeats' 
 
 #### Define the stage after which the pipeline should stop.
 
-Imagine, you want to run RepeatModeler only in order to check what types of TEs it will find. In this case run the command:
+Say, you want to run RepeatModeler only in order to check what types of TEs it will find. In this case run the command:
 
 ```
 ./MGERT.py --assembly genome.fna.gz --to-stage rmod
