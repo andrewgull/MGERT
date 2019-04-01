@@ -1606,7 +1606,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.7.1')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.7.5')
 
     args = parser.parse_args()
 
@@ -1621,7 +1621,14 @@ if __name__ == '__main__':
         # copies the config from the dir above (the pipeline has to be configured)
         # MGERT runs make_local_cdd
         # MGERT runs itself
-        if os.path.isfile("./test_dataset.tgz"):
+        mgert_path = which('MGERT.py')
+        if os.path.islink(mgert_path):
+            # mgert exe is a symlink
+            mgert_path = os.path.realpath(mgert_path)
+        path_prefix = mgert_path[:-8]
+        test_dataset = path_prefix + "test_dataset.tgz"
+
+        if os.path.isfile(test_dataset):
             print("Run MGERT on small dataset, it may take a while...")
             test_tar = tarfile.open("test_dataset.tgz", "r")
             test_tar.extractall()
