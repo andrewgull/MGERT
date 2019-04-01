@@ -1606,7 +1606,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.7.5')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.8.1')
 
     args = parser.parse_args()
 
@@ -1622,35 +1622,44 @@ if __name__ == '__main__':
         # MGERT runs make_local_cdd
         # MGERT runs itself
         mgert_path = which('MGERT.py')
-        if os.path.islink(mgert_path):
-            # mgert exe is a symlink
-            mgert_path = os.path.realpath(mgert_path)
-        path_prefix = mgert_path[:-8]
-        test_dataset = path_prefix + "test_dataset.tgz"
+
+        if mgert_path == None or "/usr/local/bin/" not in mgert_path:
+            ans = input("Seems you didn't install MGERT as it was suggested."
+                        "To run self-test enter path to the test_dataset.tgz > ")
+            test_dataset = os.path.join(ans, "test_dataset.tgz")
+        else:
+            test_dataset = "/usr/share/mgert/test_dataset.tgz"
+
+        # MGERT assumes that config.json is in CWD (where it was configured - config.json is there!)
+        # then get config path (in CWD)
+        config_path = os.path.join(os.getcwd(), "config.json")
+        if not os.path.isfile(config_path):
+            print("Error! config.json not found, have you configured the pipeline?\nQuit.")
+            sys.exit(1)
 
         if os.path.isfile(test_dataset):
             print("Run MGERT on small dataset, it may take a while...")
+            print("MGERT will create a directory for test run in %s" % os.path.join("/home", os.environ['USER']))
+            # cp test dataset to /home/user/mgert_test_run
+            os.chdir(os.path.join("/home", os.environ['USER']))
+            os.mkdir("mgert_test_run")
+            os.chdir("mgert_test_run")
+            shutil.copyfile(test_dataset, "./test_dataset.tgz")
+            shutil.copyfile(config_path, "./config.json")
             test_tar = tarfile.open("test_dataset.tgz", "r")
             test_tar.extractall()
-            try:
-                os.chdir("./test_dataset")
-            except FileNotFoundError:
-                print("Error! Could't find test_dataset directory! Quit.")
-                sys.exit()
-            try:
-                shutil.copyfile("../config.json", "./config.json")
-            except FileNotFoundError:
-                print("Error! config.json not found, have you configured the pipeline?\nQuit.")
-                sys.exit()
-            # run the pipeline
+
+            # MGERT should run inside the test_dataset directory
+            os.chdir("./test_dataset")
+
+            # run the pipeline inside the test_dataset
             make_local_cdd(dir_for_cd="LocalCDD")
             pipe(genome_file="test_scaffold.fasta.gz", mge_type="CR1", threads=multiprocessing.cpu_count())
             print("Test finished:\nSuccess! Everything works fine.")
-            sys.exit()
+            sys.exit(0)
         else:
-            print("Error! Test dataset not found! Try to put test_dataset.tgz in the current working directory "
-                  " and run 'MGERT.py --test' again.")
-            sys.exit()
+            print("Error! Test dataset not found! File test_dataset.tgz should be in %s " % test_dataset)
+            sys.exit(1)
 
     if args.check_types:
         check_types(seq_file=args.check_types)
