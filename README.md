@@ -204,18 +204,23 @@ required arguments:
                         specify the type of MGE to search
 
 optional arguments:
+  --test                testing runs on a toy data set
   -cd [domains.csv], --cd-table [domains.csv]
                         comma delimited file with smp files and their grouping
   -f [cons/coords/orfs/flanks], --from-stage [cons/coords/orfs/flanks]
                         specify the step from which the pipeline should start. 'consensus' - get consensus sequences; 'coords' - get sequences; 'orfs' - get ORFs; flanks - add flanking sequences to CDS.
                         Default 'rmod'
+   -S [rmod/cons/coords/orf/flanks], --to-stage [rmod/cons/coords/orf/flanks]
+                        specify the step up to which the pipeline should run.
+                        
   -k [consensus file], --check-types [consensus file]
                         Print out all the types of MGE found in the RepeatModeler output
   -t [integer], --threads [integer]
                         set number of threads. Default 1
-  -C, --censor          use CENSOR for additional classification or not
+  -C [html file or URL-address], --censor [html file or URL-address]          
+                        use CENSOR for additional classification or not, default no
   -o, --ori             if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file
-  -m M, --merge M       merge all hits within M bp into a single entry. Default 500 bp
+  -m M, --merge M       merge all hits within M bp into a single entry. Default 0 bp (no merge)
   -e [real], --e-value [real]
                         set expectation value (E). Default 0.01
   -c [integer], --start-codon [integer]
@@ -226,14 +231,14 @@ optional arguments:
                         output ORFs on specified strand only. Default 'plus'
   -g [integer], --genetic-code [integer]
                         genetic code to use (1-31, Default 1). See http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi for details.
-  -le [500], --left-end [500]
-                        length of ORFs' left flanking region. Default 500 bp
-  -re [500], --right-end [500]
-                        length of ORFs' right flanking region. Default 500 bp
-  -L [fasta file], --lib [fasta file]
+  -le [0], --left-end [0]
+                        length of ORFs' left flanking region. Default 0 bp
+  -re [0], --right-end [0]
+                        length of ORFs' right flanking region. Default 0 bp
+  -L [fasta file], --rm-library [fasta file]
                         library for RepeatMasker (fasta format). Use with `-f cons` only.
                         When consensus library is not specified it will be automatically composed from RepeatModeler output
-  -L [RepeatMasker table], --rm-table [RepeatMasker table]
+  -rm [RepeatMasker table], --rm-table [RepeatMasker table]
                         specify repeat masker table to use, default none. Use with `-f coords` option only
   -sq [sequence.fasta], --sequence [sequence.fasta]
                         specify file name of sequences where to look for domains. Use with `-f orf` option only
