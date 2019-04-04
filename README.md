@@ -13,6 +13,7 @@ Table of contents:
     + [Full pipeline run starting from *de novo* MGE search using RepeatModeler](#full-pipeline-run-starting-from--de-novo--mge-search-using-repeatmodeler)
     + [Pipeline run from an arbitrary step](#pipeline-run-from-an-arbitrary-step)
     + [Define the stage after which the pipeline should stop.](#define-the-stage-after-which-the-pipeline-should-stop)
+  * [Output description](#output-description)
   * [List of arguments](#list-of-arguments)
     + [Required arguments](#required-arguments)
     + [Configuration arguments](#configuration-arguments)
