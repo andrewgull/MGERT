@@ -4,13 +4,19 @@
 *MGERT* utilizes several established bioinformatic tools combined into single pipeline which hides different technical quirks from an inexperienced user.
 
 Table of contents:
-
-1. [ Requirements. ](#requirements)
-2. [ Short description. ](#short-description)
-3. [ Flowchart of the pipeline. ](#flowchart-of-mgert-pipeline)
-4. [ Installation ](#installation)
-5. [ Usage examples ](#usage-examples)
-6. [ List of arguments ](#list-of-arguments)
+  * [Requirements](#requirements)
+  * [Short description](#short-description)
+  * [Flowchart of MGERT pipeline](#flowchart-of-mgert-pipeline)
+  * [Installation](#installation)
+  * [Usage examples](#usage-examples)
+    + [Preparation steps](#preparation-steps)
+    + [Full pipeline run starting from *de novo* MGE search using RepeatModeler](#full-pipeline-run-starting-from--de-novo--mge-search-using-repeatmodeler)
+    + [Pipeline run from an arbitrary step](#pipeline-run-from-an-arbitrary-step)
+    + [Define the stage after which the pipeline should stop.](#define-the-stage-after-which-the-pipeline-should-stop)
+  * [List of arguments](#list-of-arguments)
+    + [Required arguments](#required-arguments)
+    + [Configuration arguments](#configuration-arguments)
+    + [Optional arguments](#optional-arguments)
 
 
 <a name="requirements"></a>
@@ -52,7 +58,7 @@ During the steps 3 & 4 the pipeline creates several diagnostic plots and calcula
 <a name="flowchart-of-mgert-pipeline"></a>
 ### Flowchart of MGERT pipeline
 
-![flowchart](flowchart.png)
+![flowchart](figures/flowchart.png)
 
 
 <a name="installation"></a>
@@ -61,8 +67,7 @@ During the steps 3 & 4 the pipeline creates several diagnostic plots and calcula
 Clone the repository and run installation script (requires administrator permissions):
 
 ```bash
-git clone https://github.com/andrewgull/MGERT
-cd MGERT
+git clone https://github.com/andrewgull/MGERT && cd MGERT
 sudo ./install.sh
 ```
 
@@ -79,7 +84,7 @@ to enter a path to `test_dataset.tgz` when running `MGERT.py --test` (see below 
    - First, run configuration script with the following command:
 
 ```bash
-./MGERT.py --configure
+MGERT.py --configure
 ```
 This command will create a configuration file *config.json* with all the necessary paths (see "Requirements" section) 
 and filenames MGERT uses. MGERT will try to find all the paths automatically. Unless it couldn't find them, it will 
@@ -123,11 +128,10 @@ tar -zxvf cdd.tar.gz cd00304.smp
    to your working directory along with a CSV file specifying file - domain correspondence, and run MGERT with the following flag:
 
 ```bash
-./MGERT.py --make-cdd
+MGERT.py --make-cdd
 ```
 This command will create a directory *LocalCDD* with all the necessary files inside it and the path to this CDD will be added to the *config.json*.
 
-**Note:** 
 
 Now you can run the pipeline.
 
@@ -137,7 +141,7 @@ Now you can run the pipeline.
 The shortest way is to run MGERT with  *all-default* parameters (see "Parameters" section):
 
 ```bash
-./MGERT.py --mge-type Penelope --assembly genome.fna.gz
+MGERT.py --mge-type Penelope --assembly genome.fna.gz
 ```
 This command runs search and retrieving of [Penelope](https://www.pnas.org/content/94/1/196) retrotransposons' ORFs and flanking regions in the genome assembly.
 
@@ -154,7 +158,7 @@ There are three possible steps to run the pipeline from (except the default one)
 Let's consider the situation when you already have a repeat library called, say, `Penelope_consensi.fasta` and you want to find instances of the repeats from the library in your assembly, and therefore there is no need to run *de novo* part of the pipeline. In this case simply type in the following command:
 
 ```bash
-./MGERT.py --mge-type Penelope  --from-stage cons --lib Penelope_consensi.fasta
+MGERT.py --assembly genome.fna --mge-type Penelope  --from-stage cons --lib Penelope_consensi.fasta
 ```
 
 If consensus library is not specified, it will be automatically generated from the RepeatModeler output.
@@ -182,43 +186,56 @@ where:
  - *75%* - the 75th percentile (the 3rd quartile) of length of found repeats/hits;
  - *max* - maximum length of found repeats/hits.
 
-![histogram](hist.png)
+![histogram](figures/hist.png)
 
 - coordinates step
 
-In the case when you have coordinates of repeats' matches (either in RepeatMasker output file format or BED file), you can run MGERT as follows:
+In case when you have coordinates of repeats' matches (e.g. from previous step) - either *.out* or *.bed* file - you can run MGERT as follows:
 
 ```bash
-./MGERT.py -T Penelope --from-stage coords --rm-table Penelope_consensi_matches.rm.out
+MGERT.py --assembly genome.fna --mge-type MGE --from-stage coords --rm-table genome.fna.out
 ```
 
-After this step a table with descriptive statistics and a histogram of repeats' lengths will be generated as well.
+After this step a table with descriptive statistics and a histogram of repeats' lengths will be generated.
 
 - ORFs step
 
-Specify fasta file with sequences where to look for conserved domains and run the command:
+In case when you have TEs sequences (in FASTA format, normally it's the output of the previous step) and want to find ORFs with conserved domains, run the following command:
 
 ```bash
-./MGERT.py -T Penelope --from-stage orfs --sequence Penelope_matches_ORFs.fasta
+MGERT.py --assembly genome.fna --mge-type MGE --from-stage orfs --sequence MGE_sequences.fasta
 ```
 
 After this step a table with descriptive statistics and a histogram of repeats' lengths will be generated as well.
+
+ - flanks step
+ 
+Is useful if you want to add flanking regions of certain length to ORFs.
+
+```bash
+MGERT.py --assembly genome.fna --mge-type MGE --from-stage flanks
+```
+
+Note, that at this step input is taken automatically from the config file what is OK if the previous step was done,
+otherwise MGERT will prompt you to enter the path to the fasta with ORFs.
+Also, input ORFs must be the ones that ORFfinder produces, cause their headers contain all the information MGERT 
+requires to excise them from a genome.
 
 #### Define the stage after which the pipeline should stop.
 
 Say, you want to run RepeatModeler only in order to check what types of TEs it will find. In this case run the command:
 
 ```bash
-./MGERT.py --assembly genome.fna.gz --to-stage rmod
+MGERT.py --assembly genome.fna.gz --to-stage rmod
 
-./MGERT.py --check-types ./genome.fna/consensi.fa.classified
+MGERT.py --check-types ./genome/consensi.fa.classified
 
 ```
 
 To stop MGERT after RepeatMasker run, use:
 
 ```bash
-./MGERT.py --assembly genome.fna.gz -T Penelope --to-stage coordinates
+MGERT.py --assembly genome.fna.gz -T Penelope --to-stage coordinates
 
 ``` 
 
@@ -227,7 +244,7 @@ To stop MGERT after RepeatMasker run, use:
 
 #### Required arguments
 
-`-a, --assembly` - specify a genome assembly file (e.g. genome.fa.gz); this argument is mandatory on all stages because it
+`-a, --assembly` - specify a genome assembly file (e.g. genome.fa.gz); this argument is mandatory on all stages since it
 indicates where the working directory is.
 
 `-T, --mge-type` - specify the type of MGE to search (e.g. L1/BovB/RTE/CR1/LINE/Penelope/DIRS etc.)
