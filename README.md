@@ -239,6 +239,44 @@ MGERT.py --assembly genome.fna.gz -T Penelope --to-stage coordinates
 
 ``` 
 
+### Output description
+
+MGERT outputs the following files:
+
+ 1. **rmod** step:
+     - *RepModOut* directory with all the files produced by the RepeatModeler
+     - *consensi.fa.classified* - a fasta file with all the TEs' consensus sequences found by the RepeatModeler
+     - *All_TE_consensi.fa* - a fasta file with consensus sequences of specified TE (**input for the following step**)
+     - *Unknown_consensi.fa.classified* - fasta file with unclassified consensus sequences
+     - *Unknown_classified.fa* - a fasta file with unknown consensus sequences classified by the CENSOR software
+ 2. **consensus** step:
+     - *TE_genome.fna.RMout.txt* - stdout of RepeatMasker
+     - *TE_genome.fna.masked* - genome.fna with masked TE hits
+     - *TE_genome.fna.out* - a table with TE hits coordinates (**input for the following step**)
+     - *TE_genome.fna.ori.out* - a table with TE hits coordinates without RepeatMasker merging (**alternative input for the following step**)
+     - *TE_genome.fna.out.gff* - an annotation of the TE hits in GFF format
+     - *TE_genome.fna.tbl* - a table with number of bases masked by RepeatMasker (TE abundance percentage)
+     - *genome.fna.fai* - genome index
+     - *TE_genome.fna.out.bed* -  a table with TE hits coordinates in BED format (**alternative input for the following step**)
+ 3. **coordinates** step:
+     - *TE_excised_matchesX.fa* - a fasta with TE hits retrieved from the genome. *X* stands for *--merge* value (**input for the following step**)
+     - *TE_excised_matchesX.png* - a histogram of length distribution of corresponding sequences
+     - *TE_excised_matchesX.stats* - a table with descriptive statistics
+ 4. **orfs** step:
+     - *TE_matches_with_hits_eX.fa* - fasta file with those matches (from previous step) that contain CD hits. *X* stands for e-value cut off
+     - *TE_matches_with_hits_eX.png* - a histogram of length distribution of corresponding sequences
+     - *TE_matches_with_hits_eX.stats* - a table with descriptive statistics
+     - *TE_cdsX_with_CD_eZ.fa* - a fasta file with TE's ORFs of min length *X* and e-value cut off *Z* (**input for the following step**)
+     - *TE_cdsX_with_CD_eZ.faa* - a fasta file with TE's translated ORFs of min length *X* and e-value cut off *Z*
+     - *TE_cdsX_with_CD_eZ.png* - a histogram of length distribution of corresponding nucleotide sequences
+     - *TE_cdsX_with_CD_eZ.stats* - a table with descriptive statistics
+ 5. **flanks** step (optional):
+     - *TE_cdsX_with_CD_eZ_extended_LaRb.fa* - a fasta file with TE's ORFs of min length *X* and e-value cut off *Z*, left flanking sequence of length *a* 
+     and right flanking sequence of length *b*
+ 
+
+
+
 <a name="list-of-arguments"></a>
 ### List of arguments
 
