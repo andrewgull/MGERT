@@ -1552,7 +1552,12 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
             print("Zero length of both flanks detected.\nSkip the 5th stage.")
         else:
             print("5/5. Adding flanking regions...")
-            cds = read_config("ORFinder Output Checked")
+            try:
+                cds = read_config("ORFinder Output Checked")
+            except KeyError:
+                print("Input ORFs was not found in the config")
+                cds_ans = input("Enter a path to a file of ORFs to be flanked > ")
+                cds = cds_ans
             extender(genome_file=genome_file, cds_file=cds, left_elongation_value=le, right_elongation_value=re)
             print("MGERT finished.")
 
@@ -1607,7 +1612,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.8.3')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.8.4')
 
     args = parser.parse_args()
 
