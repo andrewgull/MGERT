@@ -225,56 +225,57 @@ To stop MGERT after RepeatMasker run, use:
 <a name="list-of-arguments"></a>
 ### List of arguments
 
-```
-required arguments:
-  -a [genome.fa.gz], --assembly [genome.fa.gz]
-                        specify a genome assembly file
-  -T [Penelope/BovB/RTE/CR1/L1/LINE etc], --mge-type [Penelope/BovB/RTE/CR1/L1/LINE etc]
-                        specify the type of MGE to search
+#### Required arguments
 
-optional arguments:
-  --test                testing runs on a toy data set
-  -cd [domains.csv], --cd-table [domains.csv]
-                        comma delimited file with smp files and their grouping
-  -f [cons/coords/orfs/flanks], --from-stage [cons/coords/orfs/flanks]
-                        specify the step from which the pipeline should start. 'consensus' - get consensus sequences; 'coords' - get sequences; 'orfs' - get ORFs; flanks - add flanking sequences to CDS.
-                        Default 'rmod'
-   -S [rmod/cons/coords/orf/flanks], --to-stage [rmod/cons/coords/orf/flanks]
-                        specify the step up to which the pipeline should run.
-                        
-  -k [consensus file], --check-types [consensus file]
-                        Print out all the types of MGE found in the RepeatModeler output
-  -t [integer], --threads [integer]
-                        set number of threads. Default 1
-  -C [html file or URL-address], --censor [html file or URL-address]          
-                        use CENSOR for additional classification or not, default no
-  -o, --ori             if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file
-  -m M, --merge M       merge all hits within M bp into a single entry. Default 0 bp (no merge)
-  -e [real], --e-value [real]
-                        set expectation value (E). Default 0.01
-  -c [integer], --start-codon [integer]
-                        ORF start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation codons; 2 = any sense codon; Default 0
-  -l [integer], --min-length [integer]
-                        set minimum length of ORF, default 1000 bp
-  -s [plus/minus/both], --strand [plus/minus/both]
-                        output ORFs on specified strand only. Default 'plus'
-  -g [integer], --genetic-code [integer]
-                        genetic code to use (1-31, Default 1). See http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi for details.
-  -le [0], --left-end [0]
-                        length of ORFs' left flanking region. Default 0 bp
-  -re [0], --right-end [0]
-                        length of ORFs' right flanking region. Default 0 bp
-  -L [fasta file], --rm-library [fasta file]
-                        library for RepeatMasker (fasta format). Use with `-f cons` only.
-                        When consensus library is not specified it will be automatically composed from RepeatModeler output
-  -rm [RepeatMasker table], --rm-table [RepeatMasker table]
-                        specify repeat masker table to use, default none. Use with `-f coords` option only
-  -sq [sequence.fasta], --sequence [sequence.fasta]
-                        specify file name of sequences where to look for domains. Use with `-f orf` option only
-  -v, --version         show program's version number and exit
+`-a, --assembly` - specify a genome assembly file (e.g. genome.fa.gz); this argument is mandatory on all stages because it
+indicates where the working directory is.
 
-configuration arguments:
-  --configure           run the configuration script
-  --make-cdd            make local CDD
+`-T, --mge-type` - specify the type of MGE to search (e.g. L1/BovB/RTE/CR1/LINE/Penelope/DIRS etc.)
 
-```
+
+#### Configuration arguments
+
+`-configure` - run the configuration script
+`--make-cdd` - make local CDD
+
+#### Optional arguments
+
+`--test` - run self-test after configuration on a toy data set
+
+`-cd, --cd-table` - specify a path to a comma or tab delimited table of SMP files and their grouping (e.g. domains.csv). CSV extension is mandatory.
+
+`-f, --from-stage` - specify the step from which the pipeline should start: 'consensus' - get consensus sequences; 
+'coords' - get sequences; 'orfs' - get ORFs; 'flanks' - add flanking sequences to CDS (default - *rmod*).
+
+`-S, --to-stage` - specify the step (*rmod, consensus, coords, orfs* or *flanks*) at which the pipeline should finish (default - *flanks*)
+
+`-k, --check-types` - print out all the types of MGE found in the RepeatModeler output (e.g. `./consensi.fa.classified`).
+
+`-t, --threads` - set number of threads (default - all available CPUs).
+
+`-C, --censor` - provide a path to CENSOR classification results (HTML file or URL).
+
+`-o, --ori` - if specified MGERT will use the `*.ori` file to fetch the coordinates instead of `*_rm.out` file.
+
+`-m, --merge` - merge all hits within that number of bp into a single entry. Default 0 bp (i.e. no merge).
+
+`-e, --e-value` - set expectation value (E) for RPS-BLAST. Default 0.01.
+
+`-c, --start-codon` - ORF start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation codons; 2 = any sense codon; Default 0.
+
+`-l, --min-length` - set minimum length of ORF to be reported, default 1000 bp.
+
+`-s, --strand` - output ORFs on specified strand only (e.g. plus/minus/both). Default 'plus'.
+
+`-le, --left-end` - set length of left (5') flanking region. Default 0 bp.
+
+`-re, -right-end` - set length of right (3') flanking region. Default 0 bp (if both *le* and *re* are set to 0, flanks mode would be omitted).
+
+`-L, --rm-library` - specify a path to a library for RepeatMasker (in FASTA format). Use with `-f consensus` only. 
+If consensus library is not specified, it would be compiled from RepeatModeler output automatically.
+
+`-rm, --rm-table` - specify repeat masker table to use (with `*_rm.out` or `*.bed` extension). Use with `-f coords` option only.
+
+`-sq, --sequence` - provide a path to a file of sequences where to look for conservative domains. Use with `-f orf` option only.
+
+`-v, --version` - show program's version number and exit.
