@@ -1606,7 +1606,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.8.1')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.8.2')
 
     args = parser.parse_args()
 
@@ -1645,9 +1645,10 @@ if __name__ == '__main__':
             os.mkdir("mgert_test_run")
             os.chdir("mgert_test_run")
             shutil.copyfile(test_dataset, "./test_dataset.tgz")
-            shutil.copyfile(config_path, "./config.json")
             test_tar = tarfile.open("test_dataset.tgz", "r")
             test_tar.extractall()
+            # config.json should be in the test_dataset directory
+            shutil.copyfile(config_path, "./test_dataset/config.json")
 
             # MGERT should run inside the test_dataset directory
             os.chdir("./test_dataset")
