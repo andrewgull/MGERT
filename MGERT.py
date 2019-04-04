@@ -5,6 +5,7 @@ look at the argparse section
 """
 
 import argparse
+from datetime import datetime
 import os
 import re
 import glob
@@ -1606,7 +1607,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.8.2')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.8.3')
 
     args = parser.parse_args()
 
@@ -1642,8 +1643,12 @@ if __name__ == '__main__':
             print("MGERT will create a directory for test run in %s" % os.path.join("/home", os.environ['USER']))
             # cp test dataset to /home/user/mgert_test_run
             os.chdir(os.path.join("/home", os.environ['USER']))
-            os.mkdir("mgert_test_run")
-            os.chdir("mgert_test_run")
+            # get time
+            now = datetime.now()
+            now = now.strftime('_%y%m%d_%H%M%S')
+            # add time to the directory name to avoid FileExistsError in future
+            os.mkdir("mgert_test_run" + now)
+            os.chdir("mgert_test_run" + now)
             shutil.copyfile(test_dataset, "./test_dataset.tgz")
             test_tar = tarfile.open("test_dataset.tgz", "r")
             test_tar.extractall()
