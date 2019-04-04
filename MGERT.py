@@ -1578,19 +1578,19 @@ if __name__ == '__main__':
     #optional group
     excl_group = optional.add_mutually_exclusive_group()
     optional.add_argument("--test", action="store_true", help="testing runs on a toy data set")
-    optional.add_argument("-cd", "--cd-table", type=str, metavar="[domains.csv]", help="comma delimited file with smp files and their grouping", default="")
+    optional.add_argument("-cd", "--cd-table", type=str, metavar="[domains.csv]", help="comma or tab delimited file with smp files and their grouping. CSV extension is mandatory.", default="")
     optional.add_argument("-f", "--from-stage", type=str, metavar="[cons/coords/orfs/flanks]", help="specify the step from which the pipeline should start. 'consensus' - get consensus sequences; "
                                                                                  "'coords' - get sequences; "
-                                                                                 "'orfs' - get ORFs; flanks - add flanking sequences to CDS.\nDefault 'rmod'", default="rmod")
-    optional.add_argument("-S", "--to-stage", type=str, metavar="[rmod/cons/coords/orf/flanks]", help="specify the step up to which the pipeline should run.", default="flanks")
+                                                                                 "'orfs' - get ORFs; 'flanks' - add flanking sequences to CDS.\nDefault 'rmod'", default="rmod")
+    optional.add_argument("-S", "--to-stage", type=str, metavar="[rmod/cons/coords/orf/flanks]", help="specify the step at which the pipeline should finish.", default="flanks")
     #optional.add_argument("-k", "--check_types", action="store_true", help="Print out all the types of MGE found in the RepeatModeler output")
     optional.add_argument("-k", "--check-types", type=str, metavar="[consensus file]", help="Print out all the types of MGE found in the RepeatModeler output")
     optional.add_argument("-t", "--threads", type=int, metavar="[integer]", help="set number of threads. Default - all CPUs available", default=multiprocessing.cpu_count())
     optional.add_argument("-C", "--censor", type=str, nargs='?', metavar="[html file or URL-address]", help="use CENSOR for additional classification or not", default='no')
     optional.add_argument("-o", "--ori", action="store_true", help="if specified MGERT will use the *.ori file to fetch the coordinates instead of *_rm.out file", default=False)
     # optional.add_argument("-d", "--pandas", action="store_false", help="run GetSeq with pandas (can be very slow)", default=False)
-    optional.add_argument("-m", "--merge", type=int, metavar="[0]", help="merge all hits within M bp into a single entry. Default 0 bp (no merge)", default=0)
-    optional.add_argument("-e", "--e-value", type=float, metavar="[real]", help="set expectation value (E). Default 0.01", default=0.01)
+    optional.add_argument("-m", "--merge", type=int, metavar="[0]", help="merge all hits within M bp into a single entry. Default 0 bp (i.e. no merge)", default=0)
+    optional.add_argument("-e", "--e-value", type=float, metavar="[real]", help="set expectation value (E) for RPS-BLAST. Default 0.01", default=0.01)
     optional.add_argument("-c", "--start-codon", type=int, metavar="[integer]", help="ORF start codon to use. 0 = 'ATG' only; 1 = 'ATG' and alternative initiation "
                                                                                                   "codons; 2 = any sense codon; Default 0", default=0)
     optional.add_argument("-l", "--min-length", type=int, metavar="[integer]", help="set minimum length of ORF, default 1000 bp", default=1000)
