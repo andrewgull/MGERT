@@ -253,6 +253,7 @@ indicates where the working directory is.
 #### Configuration arguments
 
 `-configure` - run the configuration script
+
 `--make-cdd` - make local CDD
 
 #### Optional arguments
