@@ -66,7 +66,7 @@ cd MGERT
 sudo ./install.sh
 ```
 
-If you can't run installation script with sudo, you could place `MGERT.py` wherever you want, but you would be prompt 
+If you can't run installation script with sudo, you could place `MGERT.py` wherever you want, but you will be prompt 
 to enter a path to `test_dataset.tgz` when running `MGERT.py --test` (see below for details).
 
 
@@ -269,10 +269,10 @@ indicates where the working directory is.
 
 `-le, --left-end` - set length of left (5') flanking region. Default 0 bp.
 
-`-re, -right-end` - set length of right (3') flanking region. Default 0 bp (if both *le* and *re* are set to 0, flanks mode would be omitted).
+`-re, -right-end` - set length of right (3') flanking region. Default 0 bp (if both *le* and *re* are set to 0, flanks mode will be omitted).
 
 `-L, --rm-library` - specify a path to a library for RepeatMasker (in FASTA format). Use with `-f consensus` only. 
-If consensus library is not specified, it would be compiled from RepeatModeler output automatically.
+If consensus library is not specified, it will be compiled from RepeatModeler output automatically.
 
 `-rm, --rm-table` - specify repeat masker table to use (with `*_rm.out` or `*.bed` extension). Use with `-f coords` option only.
 
