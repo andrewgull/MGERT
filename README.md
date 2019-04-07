@@ -70,6 +70,7 @@ Clone the repository and run installation script (requires administrator permiss
 ```bash
 git clone https://github.com/andrewgull/MGERT && cd MGERT
 sudo ./install.sh
+
 ```
 
 If you can't run installation script with sudo, you could place `MGERT.py` wherever you want, but you will be prompt 
