@@ -46,7 +46,7 @@ Table of contents:
 The pipeline includes five steps:
 1. *de novo* search for all MGEs in the genome assembly with *RepeatModeler*. 
 This step results in a set of consensus sequences for every MGE class/family found (in *fasta* format).
-Note, that the classification of the consensuses is made by the REPET package (as the part of RepeatModeler pipeline), and you can retrieve only those MGEs that were classified.
+Note, that the classification of the consensuses is made by the RECON package (as the part of RepeatModeler pipeline), and you can retrieve only those MGEs that were classified.
 2. collecting particular consensuses and search for their matches in the genome assembly (using *RepeatMasker*).
 3. excising of found matches from the genome assembly according to coordinates in the annotation table from previous step.
 4. search only for those sequences that contain Conserved Domains (CD), Open Reading Frame (ORF) and CD within this ORF (via successive runs of RPS-blast and ORFinder)
