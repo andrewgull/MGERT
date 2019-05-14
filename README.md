@@ -18,7 +18,7 @@ Table of contents:
     + [Required arguments](#required-arguments)
     + [Configuration arguments](#configuration-arguments)
     + [Optional arguments](#optional-arguments)
-
+  * [Citation](#citation)
 
 <a name="requirements"></a>
 ### Requirements
@@ -337,3 +337,8 @@ If consensus library is not specified, it will be compiled from RepeatModeler ou
 `-sq, --sequence` - provide a path to a file of sequences where to look for conservative domains. Use with `-f orf` option only.
 
 `-v, --version` - show program's version number and exit.
+
+<a name="citation"></a>
+### Citation
+
+Guliaev AS, Semyenova SK. MGERT: a pipeline to retrieve coding sequences of mobile genetic elements from genome assemblies. Mob DNA. 2019;10(1):21. doi:10.1186/s13100-019-0163-6
