@@ -341,6 +341,8 @@ If consensus library is not specified, it will be compiled from RepeatModeler ou
 <a name="citation"></a>
 ### Citation
 
-Use the following citation style:
+Please, use the following citation, if you used MGERT in your research:
 
 Guliaev AS, Semyenova SK. MGERT: a pipeline to retrieve coding sequences of mobile genetic elements from genome assemblies. Mob DNA. 2019;10(1):21. doi:10.1186/s13100-019-0163-6
+
+Shortened URL to access the full-text article: https://rdcu.be/bCnQx
