@@ -1399,9 +1399,9 @@ def pipe(genome_file, mge_type, dom_table="", lib="", rm_tab="", seq_for_dom='',
         # when rmodeler finished, it chdir back
         # collect Unknown repeats
         filenm = read_config("RepeatModeler Output")
-        os.chdir("test_scaffold/")
-        repeat_collector(filenm, "Unknown")
-        os.chdir("..")
+        # os.chdir("test_scaffold/")
+        # repeat_collector(filenm, "Unknown")
+        # os.chdir("..")
         # if to_stage equals stage, stop
         if to_stage == stage:
             print("Stage 1 finished.")
@@ -1612,7 +1612,7 @@ if __name__ == '__main__':
                         help="specify repeat masker table to use, default none. Use with `-f coords` option only", required=False, default="")
     excl_group.add_argument("-sq", "--sequence", type=str, metavar="[sequence.fasta]",
                         help="specify file name of sequences where to look for domains. Use with `-f orf` option only", required=False, default="")
-    optional.add_argument("-v", "--version", action='version', version='%(prog)s 0.8.4')
+    optional.add_argument("-v", "--version", action='version', version='%(prog)s 1.0.1')
 
     args = parser.parse_args()
 
