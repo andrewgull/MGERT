@@ -6,4 +6,20 @@ configfile: "config.yaml"
 
 rule all:
     input:
-        expand("results/final/{strain}_all.done", strain=config['strains'])
+        expand("results/final/{genome}_all.done", strain=config['genomes'])
+
+rule repeat_modeler_database:
+    input:
+        ""
+rule rename_scaffolds:
+    input: ""
+    output: "resources/assemblies/{genome}/ref.fa"
+    shell: "awk '/^>/{print \">sc\" ++i; next}{print}' < {input} > {output}"
+rule repeat_modeler:
+    input:
+        "resources/assemblies/{genome}.fna"
+    output:
+        "results/repeatmodeler/{genome}/consesni.fa"
+    shell:
+        ""
+
