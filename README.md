@@ -59,7 +59,7 @@ During the steps 3 & 4 the pipeline creates several diagnostic plots and calcula
 <a name="flowchart-of-mgert-pipeline"></a>
 ### Flowchart of MGERT pipeline
 
-![flowchart](figures/flowchart.png)
+![flowchart](images/flowchart.png)
 
 
 <a name="installation"></a>
@@ -188,7 +188,7 @@ where:
  - *75%* - the 75th percentile (the 3rd quartile) of length of found repeats/hits;
  - *max* - maximum length of found repeats/hits.
 
-![histogram](figures/hist.png)
+![histogram](images/hist.png)
 
 - coordinates step
 
