@@ -1,0 +1,5 @@
+name: repmasker-env
+channels:
+  - bioconda
+dependencies:
+  - repeatmasker=4.0.7
