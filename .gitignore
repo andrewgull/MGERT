@@ -1,3 +1,7 @@
+# PyCharm stuff
+.idea/
+
+# data files
 **/*.fna
 **/*.fna.gz
 **/*.fasta
