@@ -25,7 +25,7 @@ rule repeat_modeler:
 
 rule final:
     input:
-        "assemblies/{name}/ref.fa"
+        "assemblies/{name}_ref.fasta"
     output:
         "results/final/{name}_{path}.done"
     shell:
