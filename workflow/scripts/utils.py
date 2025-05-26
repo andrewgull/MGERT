@@ -9,7 +9,7 @@ def read_genome_paths(file_path: str) -> pd.DataFrame:
         list of str: A list of genome assembly file paths.
     """
     try:
-        df = pd.read_csv(file_path, sep="\t", header=None, names=["name", "path"])
+        df = pd.read_csv(file_path, sep="\t")
         return df["path"].tolist()
     except Exception as e:
         raise ValueError(f"Error reading assembly paths from {file_path}: {e}")
@@ -23,7 +23,7 @@ def read_genome_names(file_path: str) -> pd.DataFrame:
         list of str: A list of genome names.
     """
     try:
-        df = pd.read_csv(file_path, sep="\t", header=None, names=["name"])
+        df = pd.read_csv(file_path, sep="\t")
         return df["name"].tolist()
     except Exception as e:
         raise ValueError(f"Error reading genome names from {file_path}: {e}")
@@ -37,7 +37,7 @@ def get_path_using_name(name: str, file_path: str) -> str:
     returns:
         str: The path of the genome assembly.
     """
-    df = pd.read_csv(file_path, sep="\t", header=None, names=["name", "path"])
+    df = pd.read_csv(file_path, sep="\t")
     row = df[df["name"] == name]
     if not row.empty:
         return row["path"].values[0]
