@@ -11,7 +11,7 @@ rule all:
 
 
 rule rename_scaffolds:
-    input: get_path_using_name(name="{name}", file_path=config.get("samples_table", []))
+    input: lambda  wildcards: get_path_using_name(name=wildcards.name, file_path=config.get("samples_table", []))
     output: "assemblies/{name}_ref.fasta"
     shell: "awk '/^>/{print \">sc\" ++i; next}{print}' < {input} > {output}"
 
