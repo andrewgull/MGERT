@@ -1,5 +1,5 @@
 from snakemake.io import touch, directory, temp, expand
-from scripts.utils import read_genome_paths, read_genome_names
+from scripts.utils import read_genome_paths, read_genome_names, get_path_using_name
 
 # read paths & names
 paths = read_genome_paths(config.get("samples_table", []))
@@ -9,9 +9,10 @@ rule all:
     input:
         expand("results/final/{name}_{path}.done", name=names, path=paths)
 
+
 rule rename_scaffolds:
-    input: "{path}"
-    output: "assemblies/{name}/ref.fa"
+    input: get_path_using_name("{name}")
+    output: "assemblies/{name}_ref.fasta"
     shell: "awk '/^>/{print \">sc\" ++i; next}{print}' < {input} > {output}"
 
 rule repeat_modeler:
