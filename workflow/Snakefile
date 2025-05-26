@@ -1,25 +1,31 @@
 from snakemake.io import touch, directory, temp, expand
+from scripts.utils import read_genome_paths, read_genome_names
 
-configfile: "config.yaml"
-# command to run the pipeline on 14 threads and 10Gb of RAM:
-# snakemake --use-conda --cores 14 --resources mem_mb=10000
+# read paths & names
+paths = read_genome_paths(config.get("samples_table", []))
+names = read_genome_names(config.get("samples_table", []))
 
 rule all:
     input:
-        expand("results/final/{genome}_all.done", strain=config['genomes'])
+        expand("results/final/{name}_{path}.done", name=names, path=paths)
 
-rule repeat_modeler_database:
-    input:
-        ""
 rule rename_scaffolds:
-    input: ""
-    output: "resources/assemblies/{genome}/ref.fa"
+    input: "{path}"
+    output: "assemblies/{name}/ref.fa"
     shell: "awk '/^>/{print \">sc\" ++i; next}{print}' < {input} > {output}"
+
 rule repeat_modeler:
     input:
-        "resources/assemblies/{genome}.fna"
+        "assemblies/{genome}.fna"
     output:
         "results/repeatmodeler/{genome}/consesni.fa"
     shell:
         ""
 
+rule final:
+    input:
+        "assemblies/{name}/ref.fa"
+    output:
+        "results/final/{name}_{path}.done"
+    shell:
+        "touch {output}"
