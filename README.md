@@ -1,5 +1,11 @@
 ## **Mobile Genetic Elements Retrieving Tool** - **MGERT**
 
+---
+
+ℹ️ [A new version](https://github.com/andrewgull/MGERT2) of this pipeline is under development!
+
+---
+
 *MGERT* is a computational pipeline for easy retrieving of MGE's coding sequences of a particular family from genome assemblies.
 *MGERT* utilizes several established bioinformatic tools combined into single pipeline which hides different technical quirks from an inexperienced user.
 
